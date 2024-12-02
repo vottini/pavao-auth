@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS pavao.functionality (
   package         TEXT,
   name            TEXT NOT NULL,
   enabled         BOOL DEFAULT TRUE,
-  active          BOOL DEFAULT TRUE,
   UNIQUE (package, name)
 );
 

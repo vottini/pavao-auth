@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS pavao.account (
   active          BOOLEAN DEFAULT TRUE,
   creation        TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   last_login      TIMESTAMP WITH TIME ZONE,
-  managerial      BOOL DEFAULT FALSE
+  bot             BOOL DEFAULT FALSE
 );
 
 
