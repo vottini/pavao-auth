@@ -4,10 +4,10 @@ import pavao
 
 delete_refresh = pavao.include('queries/delete_refresh.sql')
 
-async def process(authorizer, response, db_connection, auth_data):
+async def process(authorizer, response, pg_connection, auth_data):
 	authorizer.blacklist(auth_data)
 
-	await db_connection.execute(
+	await pg_connection.execute(
 		delete_refresh,
 		auth_data.account_id,
 		auth_data.token)

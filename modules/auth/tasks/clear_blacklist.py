@@ -9,9 +9,7 @@ async def proccess(authorizer):
 	yield f"{removed} expired tokens purged from blacklist"
 
 
-def pavao_task(db_connection):
-	if db_connection is None:
-		return
+def pavao_task():
 
 	return {
 		'package': "Pavão",

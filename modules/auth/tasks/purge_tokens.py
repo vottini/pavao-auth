@@ -15,7 +15,7 @@ purge_query = """
 
 """
 
-async def proccess(db_connection):
+async def proccess(pg_connection):
 	purged = await connection.fetchval(purge_query)
 	yield f"{purged} refresh token(s) purged"
 

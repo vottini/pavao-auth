@@ -28,10 +28,10 @@ class AuthSupplier(pavao.ParameterSupplier):
 		common.process_config(loaded_settings)
 
 
-	async def initialize(self, db_connection):
+	async def initialize(self, pg_connection):
 		if not common.enabled: return
 		await authorizer.instance.setup(
-			db_connection)
+			pg_connection)
 
 
 	def parameters_supplied(self):

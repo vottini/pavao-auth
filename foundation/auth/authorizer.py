@@ -60,9 +60,9 @@ class Authorizer:
 		self.blacklisted = dict()
 
 
-	async def setup(self, db_connection):
-		self.disabled = set(await db_connection.fetch(list_disabled_functionalities))
-		accesses = await db_connection.fetch(list_roles_accesses)
+	async def setup(self, pg_connection):
+		self.disabled = set(await pg_connection.fetch(list_disabled_functionalities))
+		accesses = await pg_connection.fetch(list_roles_accesses)
 
 		for role_id, package, functionality in accesses:
 			func_set = self.roles_access.get(role_id, set())
@@ -71,16 +71,16 @@ class Authorizer:
 
 	#--------------------------------------------------------------------------
 
-	async def register_functionality(self, endpoint_specs, db_connection):
+	async def register_functionality(self, endpoint_specs, pg_connection):
 		functionality = endpoint_specs.get("functionality")
 		if functionality is None:
 			return
 
 		package = endpoint_specs.get("package")
-		await db_connection.fetchval(assert_functionality_exists,
+		await pg_connection.fetchval(assert_functionality_exists,
 			get_identity(package), get_identity(functionality))
 
-		#await db_connection.execute(
+		#await pg_connection.execute(
 		#	set_active_functionalities,
 		#	verified_ids)
 
@@ -142,8 +142,8 @@ class Authorizer:
 
 	#--------------------------------------------------------------------------
 
-	async def allow_access(self, db_connection, functionality_id, role):
-		func_info = await db_connection.fetchrow(
+	async def allow_access(self, pg_connection, functionality_id, role):
+		func_info = await pg_connection.fetchrow(
 			retrieve_functionality,
 			functionality_id)
 
@@ -154,8 +154,8 @@ class Authorizer:
 			self.roles_access[role] = func_set
 
 
-	async def remove_access(self, db_connection, functionality_id, role):
-		func_info = await db_connection.fetchrow(
+	async def remove_access(self, pg_connection, functionality_id, role):
+		func_info = await pg_connection.fetchrow(
 			retrieve_functionality,
 			functionality_id)
 

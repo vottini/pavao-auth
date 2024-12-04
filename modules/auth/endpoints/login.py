@@ -24,11 +24,11 @@ internationalization = pavao.Internationalization(
 
 @pavao.generates_json(file_blueprint=blueprints, with_root="tokenInfo")
 @pavao.accepts_json(file_blueprint=blueprints, with_root="credentials")
-async def process(request, response, db_connection, authorizer, parsed_json):
+async def process(request, response, pg_connection, authorizer, parsed_json):
 	localizer = internationalization.create_localizer(
 		request.parse_locale_priority())
 
-	row = await db_connection.fetchrow(
+	row = await pg_connection.fetchrow(
 		select_auth_from_login,
 		parsed_json.login)
 
@@ -72,7 +72,7 @@ async def process(request, response, db_connection, authorizer, parsed_json):
 	updatedHash = storedPassword
 	if hasher.check_needs_rehash(storedPassword):
 		updatedHash = hasher.hash(sent_password)
-		await db_connection.execute(update_auth,
+		await pg_connection.execute(update_auth,
 			authId, updatedHash)
 
 	now = datetime.now(timezone.utc)
@@ -89,7 +89,7 @@ async def process(request, response, db_connection, authorizer, parsed_json):
 			"expires": access_claims['exp']
 		}
 
-	roles = await db_connection.fetch(
+	roles = await pg_connection.fetch(
 		select_roles_for_user,
 		account_id)
 
@@ -102,7 +102,7 @@ async def process(request, response, db_connection, authorizer, parsed_json):
 	refresh_hash = hashlib.md5(refresh_claims['jti'].encode()).digest().hex()
 	refresh_expiry = datetime.utcfromtimestamp(refresh_claims['exp'])
 
-	await db_connection.execute(insert_refresh,
+	await pg_connection.execute(insert_refresh,
 		account_id,
 		refresh_hash,
 		refresh_expiry,
@@ -110,7 +110,7 @@ async def process(request, response, db_connection, authorizer, parsed_json):
 
 	access_token = authorizer.generate_token(access_claims)
 	refresh_token = authorizer.generate_token(refresh_claims)
-	await db_connection.execute(touch_account,
+	await pg_connection.execute(touch_account,
 		parsed_json.login)
 
 	response.add_cookie(

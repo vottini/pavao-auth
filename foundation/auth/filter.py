@@ -10,13 +10,13 @@ class AuthFilter(pavao.RequestFilter):
 		common.process_config(loaded_settings)
 
 
-	async def enabled(self, endpoint_specs, db_connection):
+	async def enabled(self, endpoint_specs, pg_connection):
 		if not common.enabled:
 			return False
 
 		if endpoint_specs.get('public') is True: return False
 		await authorizer.instance.register_functionality(
-			endpoint_specs, db_connection)
+			endpoint_specs, pg_connection)
 
 		return True
 

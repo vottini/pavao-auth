@@ -42,11 +42,11 @@ insert_admin_access = """
 def assert_admin_access(fnc):
 
 	@functools.wraps(fnc)
-	async def wrapped(loaded_settings, persisted_settings, db_connection):
+	async def wrapped(loaded_settings, stored_settings, db_connection):
 
 		all_args = {
 			'loaded_settings': loaded_settings,
-			'persisted_settings': persisted_settings,
+			'stored_settings': stored_settings,
 			'db_connection': db_connection,
 		}
 

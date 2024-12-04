@@ -21,7 +21,7 @@ internationalization = pavao.Internationalization(
 #-------------------------------------------------------------------------------
 
 @pavao.generates_json(file_blueprint=blueprints, with_root="tokenInfo")
-async def process(request, response, db_connection):
+async def process(request, response, pg_connection):
 	accepted_languages = request.parse_locale_priority()
 	localizer = internationalization.create_localizer(accepted_languages)
 	token = request.cookies.get('token')
@@ -41,7 +41,7 @@ async def process(request, response, db_connection):
 		)
 
 	account_id = refresh_claims['sub']
-	is_active = await db_connection.fetchval(
+	is_active = await pg_connection.fetchval(
 		select_whether_active,
 		account_id)
 
@@ -55,7 +55,7 @@ async def process(request, response, db_connection):
 		refresh_claims['jti'].encode()
 	).digest().hex()
 
-	found_refresh = await db_connection.fetchrow(
+	found_refresh = await pg_connection.fetchrow(
 		find_refresh, account_id,
 		refresh_hash)
 
@@ -75,7 +75,7 @@ async def process(request, response, db_connection):
 	access_claims = credentials.create_claims(account_id, now,
 		credentials.access_validity)
 
-	roles = await db_connection.fetch(
+	roles = await pg_connection.fetch(
 		select_roles_for_user,
 		account_id)
 
@@ -87,9 +87,9 @@ async def process(request, response, db_connection):
 	refresh_hash = hashlib.md5(refresh_claims['jti'].encode()).digest().hex()
 	refresh_expiry = datetime.utcfromtimestamp(refresh_claims['exp'])
 
-	async with db_connection.transaction():
-		await db_connection.execute(remove_refresh, found_refresh['id'])
-		await db_connection.execute(insert_refresh, account_id, refresh_hash,
+	async with pg_connection.transaction():
+		await pg_connection.execute(remove_refresh, found_refresh['id'])
+		await pg_connection.execute(insert_refresh, account_id, refresh_hash,
 			refresh_expiry, access_claims['jti'])
 
 	access_token = pavao.generate_token(access_claims)
