@@ -1,5 +1,6 @@
 
 import re
+import os
 import asyncio
 import pavao
 
@@ -49,6 +50,11 @@ def parse_roles(token_claims):
 
 #-------------------------------------------------------------------------------
 
+queries_dir = pavao.path_to("database")
+db_creation = [arq for arq in os.listdir(queries_dir) if arq.endswith('.sql')]
+db_creation.sort()
+
+
 class Authorizer:
 	def __init__(self):
 		self.roles_access = dict()
@@ -61,6 +67,10 @@ class Authorizer:
 
 
 	async def setup(self, pg_connection):
+		for query in db_creation:
+			with open(os.path.join(queries_dir, query)) as fd:
+				await pg_connection.execute(fd.read())
+
 		self.disabled = set(await pg_connection.fetch(list_disabled_functionalities))
 		accesses = await pg_connection.fetch(list_roles_accesses)
 
@@ -79,10 +89,6 @@ class Authorizer:
 		package = endpoint_specs.get("package")
 		await pg_connection.fetchval(assert_functionality_exists,
 			get_identity(package), get_identity(functionality))
-
-		#await pg_connection.execute(
-		#	set_active_functionalities,
-		#	verified_ids)
 
 		ident = (
 			get_identity(package),
