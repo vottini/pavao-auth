@@ -1,0 +1,10 @@
+
+object userInfo {
+	id: integer,
+	firstName: string,
+	lastName: nullable string,
+	active: bool,
+	isAdmin: bool,
+	myAccount: bool
+}
+

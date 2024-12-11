@@ -12,46 +12,24 @@ localizer = pavao.ModuleLocalizer("ADMIN", functionalities_path)
 package_mapper = localizer.map("PACKAGE")
 
 
-search_functionality = """
+search_functionality = pavao.include("queries/search_functionality.sql")
+insert_functionality = pavao.include("queries/insert_functionality.sql")
+insert_admin_access = pavao.include("queries/insert_admin_access.sql")
 
-	SELECT id
-		FROM pavao.functionality
-		WHERE
-			package = $1 AND
-			name = $2;
-
-"""
-
-insert_functionality = """
-
-	INSERT INTO
-		pavao.functionality (package, name)
-		VALUES ($1, $2) RETURNING id;
-
-"""
-
-insert_admin_access = """
-
-	INSERT INTO
-		pavao.access (functionality, "role")
-		SELECT $1, rl.id FROM pavao."role" rl WHERE rl.admin
-		ON CONFLICT DO NOTHING;
-
-"""
 
 def assert_admin_access(fnc):
 
 	@functools.wraps(fnc)
-	async def wrapped(loaded_settings, stored_settings, db_connection):
+	async def wrapped(loaded_settings, stored_settings, pg_connection):
 
-		all_args = {
+		context = {
 			'loaded_settings': loaded_settings,
 			'stored_settings': stored_settings,
-			'db_connection': db_connection,
+			'pg_connection': pg_connection,
 		}
 
-		adapted_fnc = pavao.adapter(fnc)
-		result = await adapted_fnc(all_args)
+		adapted_fnc = pavao.async_adapter(pavao.adapter(fnc))
+		result = await adapted_fnc(context)
 		if not isinstance(result, dict):
 			return result
 
@@ -60,17 +38,17 @@ def assert_admin_access(fnc):
 		if None in (package_mapper, func_mapper):
 			return result
 
-		func_id = await db_connection.fetchval(search_functionality,
+		func_id = await pg_connection.fetchval(search_functionality,
 			package_mapper.identity(),
 			func_mapper.identity())
 
 		if func_id is None:
-			async with db_connection.transaction():
-				func_id = await db_connection.fetchval(insert_functionality,
+			async with pg_connection.transaction():
+				func_id = await pg_connection.fetchval(insert_functionality,
 					package_mapper.identity(),
 					func_mapper.identity())
 
-		await db_connection.execute(
+		await pg_connection.execute(
 			insert_admin_access,
 			func_id)
 

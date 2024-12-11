@@ -3,8 +3,9 @@ import re
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import assert_admin_access
+(pavao.from_module('common')
+	.import_item('assert_admin_access')
+	.import_item('localizer'))
 
 _allowed_pattern = re.compile(r'^[a-z][a-z0-9]*(?:.[a-z0-9]+)?$')
 _count_login = "SELECT COUNT(*) FROM pavao.account WHERE login = $1;"
@@ -15,14 +16,14 @@ def valid_login(login):
 
 
 @pavao.generates_json(string_blueprint="root bool")
-async def process(request, response, db_connection):
+async def process(request, response, pg_connection):
 	if not 'login' in request.params:
 		response.set_status(400)
-		return {"error": "Bad request"}
+		return
 
 	candidate = request.params['login']
 	if valid_login(candidate):
-		count = await db_connection.fetchval(_count_login, candidate)
+		count = await pg_connection.fetchval(_count_login, candidate)
 		return 0 == count
 
 	return False
