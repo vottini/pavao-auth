@@ -24,7 +24,7 @@ internationalization = pavao.Internationalization(
 
 @pavao.generates_json(file_blueprint=blueprints, with_root="tokenInfo")
 @pavao.accepts_json(file_blueprint=blueprints, with_root="credentials")
-async def process(request, response, pg_connection, authorizer, parsed_json):
+async def process(request, response, pg_connection, token_methods, parsed_json):
 	localizer = internationalization.create_localizer(
 		request.parse_locale_priority())
 
@@ -81,7 +81,7 @@ async def process(request, response, pg_connection, authorizer, parsed_json):
 
 	if changePassword:
 		access_claims['roles'] = ""
-		access_token = authorizer.generate_token(access_claims)
+		access_token = token_methods.generate_token(access_claims)
 
 		return {
 			"token": access_token,
@@ -108,8 +108,8 @@ async def process(request, response, pg_connection, authorizer, parsed_json):
 		refresh_expiry,
 		access_claims['jti'])
 
-	access_token = authorizer.generate_token(access_claims)
-	refresh_token = authorizer.generate_token(refresh_claims)
+	access_token = token_methods.generate_token(access_claims)
+	refresh_token = token_methods.generate_token(refresh_claims)
 	await pg_connection.execute(touch_account,
 		parsed_json.login)
 

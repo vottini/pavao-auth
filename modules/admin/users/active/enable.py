@@ -2,23 +2,17 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-enable_user = """
+enable_user = pavao.include("../../queries/enable_user.sql")
 
-	UPDATE pavao.account
-		SET active = TRUE
-		WHERE id = $1
-		RETURNING id;
-
-"""
-
-async def process(request, response, db_connection, path_variables):
+async def process(request, response, pg_connection, path_variables):
 	message_localizer = create_message_localizer(request)
-	enabled = await db_connection.fetchval(enable_user,
-		path_variables['user'])
+	enabled = await pg_connection.fetchval(enable_user,
+		path_variables['user'], True)
 
 	if enabled is None:
 		message_localizer.assign_response_error(response, "USER_NOT_FOUND")

@@ -5,16 +5,12 @@ import pavao
 
 pavao.from_module("common").import_item("localizer")
 
-async def proccess(authorizer):
+async def proccess(token_methods):
 	validity = datetime.timedelta(days=5)
-	authorizer.refresh_secret_key(validity)
+	token_methods.refresh_secret_key(validity)
 	yield "Secret key refreshed"
 
 
-#@pavao.enabled_case(
-#	"configuration": "pavao.auth.enabled",
-#	"parameters": ['authorizer']
-#)
 def pavao_task():
 
 	return {

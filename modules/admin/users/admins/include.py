@@ -2,28 +2,14 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../../common')
+	.import_item('assert_admin_access')
+	.import_item('localizer'))
 
-add_admin = """
 
-	WITH found_user AS (
-		SELECT id FROM pavao.account
-			WHERE id = $1
-	)
-
-	INSERT INTO pavao.assignment (account, "role")
-		SELECT found.id, rl.id
-			FROM found_user found
-			CROSS JOIN pavao."role" rl
-			WHERE rl.admin
-
-		ON CONFLICT DO NOTHING;
-
-"""
-
-async def process(request, response, db_connection, path_variables):
-	await db_connection.execute(add_admin, path_variables['user'])
+add_admin = pavao.include("../../queries/add_admin.sql")
+async def process(request, response, pg_connection, path_variables):
+	await pg_connection.execute(add_admin, path_variables['user'])
 
 
 @assert_admin_access

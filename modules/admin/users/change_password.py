@@ -4,40 +4,25 @@ import asyncpg
 import argon2
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-update_authentication = """
+update_authentication = pavao.include("../queries/update_authentication.sql")
+blueprints = pavao.path_to("../blueprints.jbp")
 
-	UPDATE pavao.authentication SET
-		hash = $2,
-		needs_change = $3
-		WHERE account = $1
-		RETURNING account;
-
-"""
-
-changes_blueprint = """
-
-	root {
-		password: string(minLength=8),
-		optional changePassword: bool
-	}
-
-"""
-
-@pavao.accepts_json(string_blueprint=changes_blueprint)
-async def process(request, response, db_connection, parsed_json, path_variables):
+@pavao.accepts_json(file_blueprint=blueprints, with_root="passwordUpdate")
+async def process(request, response, pg_connection, parsed_json, path_variables):
 	localizer = create_message_localizer(request)
 
 	user_id = path_variables['user']
 	hashed_password = argon2.PasswordHasher().hash(parsed_json.password)
-	change_afterwards = (pavao.has_optional_field(parsed_json, 'changePassword')
-		and parsed_json.changePassword)
+	change_afterwards = (pavao.has_optional_field(parsed_json, 'change_password')
+		and parsed_json.change_password)
 
 	try:
-		found_account = await db_connection.fetchval(update_authentication,
+		found_account = await pg_connection.fetchval(update_authentication,
 			user_id, hashed_password, change_afterwards)
 
 		if found_account is None:

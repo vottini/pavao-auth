@@ -1,10 +1,62 @@
 
+type userId: integer (min=0)
+type roleId: integer (min=0)
+
+type saneName: string (minLength=2)
+type saneLogin: string(minLength=4, format="^[a-z][a-z0-9]*(?:.[a-z0-9]+)?$")
+type sanePassword: string(minLength=8)
+
 object userInfo {
-	id: integer,
-	firstName: string,
-	lastName: nullable string,
+	id: userId,
+	firstName: saneName,
+	lastName: nullable saneName,
 	active: bool,
 	isAdmin: bool,
 	myAccount: bool
+}
+
+object userAssignmentStatus {
+	firstName: saneName,
+	lastName: nullable saneName,
+
+	assignments: {
+		id: roleId,
+		name: string,
+		assigned: bool
+	} []
+}
+
+object passwordUpdate {
+	password: sanePassword,
+	optional changePassword: bool
+}
+
+object userCreationData {
+	login: saneLogin,
+	password: sanePassword,
+	firstName: saneName,
+	optional lastName: saneName,
+	changePassword: bool
+}
+
+object fullUserData {
+	login: string,
+	firstName: saneName,
+	lastName: nullable saneName,
+	creation: instant,
+	lastLogin: nullable instant,
+	active: bool,
+	admin: bool,
+
+	roles: {
+		id: roleId,
+		name: string
+	} []
+}
+
+object userUpdate {
+	optional login: saneLogin,
+	optional firstName: saneName,
+	optional lastName: nullable saneName
 }
 

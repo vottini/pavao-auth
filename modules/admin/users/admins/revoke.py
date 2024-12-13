@@ -2,23 +2,14 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-remove_admin = """
+remove_admin = pavao.include("../../queries/remove_admin.sql")
 
-	DELETE FROM pavao.assignment
-		WHERE account = $1 AND "role" in (
-			SELECT id FROM pavao."role"
-				WHERE admin
-		)
-
-		RETURNING account;
-
-"""
-
-async def process(request, response, db_connection, path_variables, auth_data):
+async def process(request, response, pg_connection, path_variables, auth_data):
 	message_localizer = create_message_localizer(request)
 	revoked_user = path_variables['user']
 
@@ -27,7 +18,7 @@ async def process(request, response, db_connection, path_variables, auth_data):
 		response.set_status(403)
 		return
 
-	revoked = await db_connection.fetch(
+	revoked = await pg_connection.fetch(
 		remove_admin, revoked_user)
 
 	if len(revoked) == 0:

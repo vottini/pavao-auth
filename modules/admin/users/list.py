@@ -14,7 +14,7 @@ blueprints = pavao.path_to("../blueprints.jbp")
 	with_root="userInfo",
 	array_root=True)
 
-async def process(request, response, auth_data, pg_connection):
+async def process(auth_data, pg_connection):
 	retrieved = await pg_connection.fetch(list_users, auth_data.account_id)
 	return [ pavao.assemble_dicts(row) for row in retrieved ]
 

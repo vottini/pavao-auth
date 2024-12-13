@@ -33,7 +33,7 @@ async def process(request, response, db_connection, parsed_json, path_variables)
 
 	user_id = path_variables['user']
 	hashed_password = argon2.PasswordHasher().hash(parsed_json.password)
-	change_afterwards = (pavao.has_optional_field(parsed_json, 'changePassword')
+	change_afterwards = (pavao.has_optional_field(parsed_json, 'change_password')
 		and parsed_json.changePassword)
 
 	try:

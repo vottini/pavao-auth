@@ -4,59 +4,36 @@ import asyncpg
 import argon2
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
-from admin.common import capitalize
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('capitalize')
+	.import_item('localizer'))
 
-add_user = """
 
-	INSERT INTO
-		pavao.account (login, first_name, last_name)
-		VALUES ($1, $2, $3)
-		RETURNING id;
+add_user = pavao.include("../queries/add_user.sql")
+add_authentication = pavao.include("../queries/add_authentication.sql")
+blueprints = pavao.path_to("../blueprints.jbp")
 
-"""
-
-add_authentication = """
-
-	INSERT INTO
-		pavao.authentication (account, hash, needs_change)
-		VALUES ($1, $2, $3);
-
-"""
-
-user_info_blueprint = """
-
-	root {
-		login: string(minLength=5, format="^[a-z][a-z0-9]*(?:.[a-z0-9]+)?$"),
-		password: string(minLength=8),
-		firstName: string(minLength=1),
-		optional lastName: string(minLength=1),
-		changePassword: bool
-	}
-
-"""
-
-@pavao.generates_json(string_blueprint="root integer")
-@pavao.accepts_json(string_blueprint=user_info_blueprint)
-async def process(request, response, db_connection, parsed_json):
+@pavao.generates_json(file_blueprint=blueprints, with_root="userId")
+@pavao.accepts_json(file_blueprint=blueprints, with_root="userCreationData")
+async def process(request, response, pg_connection, parsed_json):
 	hashedPassword = argon2.PasswordHasher().hash(parsed_json.password)
 	localizer = create_message_localizer(request)
 
 	user_args = (
 		parsed_json.login.lower(),
-		capitalize(parsed_json.firstName),
-		(capitalize(parsed_json.lastName)
-			if pavao.has_optional_field(parsed_json, 'lastName')
+		capitalize(parsed_json.first_name),
+		(capitalize(parsed_json.last_name)
+			if pavao.has_optional_field(parsed_json, 'last_name')
 			else None)
 	)
 
 	try:
-		async with db_connection.transaction():
-			userId = await db_connection.fetchval(add_user, *user_args)
-			await db_connection.execute(add_authentication, userId,
-				hashedPassword, parsed_json.changePassword)
+		async with pg_connection.transaction():
+			userId = await pg_connection.fetchval(add_user, *user_args)
+			await pg_connection.execute(add_authentication, userId,
+				hashedPassword, parsed_json.change_password)
 
 	except asyncpg.UniqueViolationError as e:
 		response.set_status(409)

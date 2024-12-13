@@ -23,23 +23,23 @@ async def process(request, response, pg_connection, auth_data, parsed_json):
 	localizer = internationalization.create_localizer(
 		request.parse_locale_priority())
 
-	if parsed_json.oldPassword == parsed_json.newPassword:
+	if parsed_json.old_password == parsed_json.new_password:
 		response.set_status(400)
 		localizer.assign_response_error(response,
 			"SAME_PASSWORD")
 
 	try:
 		hasher = argon2.PasswordHasher()
-		storedPassword = await pg_connection.fetchval(
+		stored_password = await pg_connection.fetchval(
 			retrieve_password_hash,
 			auth_data.account_id)
 
 		hasher.verify(
-			storedPassword,
-			parsed_json.oldPassword)
+			stored_password,
+			parsed_json.old_password)
 
-		newHashedPassword = hasher.hash(parsed_json.newPassword)
-		await pg_connection.execute(update_password_hash, newHashedPassword,
+		hashed_password = hasher.hash(parsed_json.new_password)
+		await pg_connection.execute(update_password_hash, hashed_password,
 			auth_data.account_id)
 
 	except argon2.exceptions.VerifyMismatchError:

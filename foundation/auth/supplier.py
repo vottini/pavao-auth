@@ -18,8 +18,8 @@ async def select_data(access_validation):
 	return validation_outcome if has_access else None
 
 
-async def retrieve_authorizer():
-	return authorizer.instance
+async def retrieve_authorizer(): return authorizer.instance
+async def retrieve_token(): return token
 
 #-------------------------------------------------------------------------------
 
@@ -51,6 +51,11 @@ class AuthSupplier(pavao.ParameterSupplier):
 
 			'authorizer': [
 				retrieve_authorizer,
+				None
+			],
+
+			'token_methods': [
+				retrieve_token,
 				None
 			]
 		}

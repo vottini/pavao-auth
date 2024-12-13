@@ -263,17 +263,8 @@ class Authorizer:
 
 	#-----------------------------------------------------------
 
-	def refresh_secret_key(self, previous_validity=None):
-		return token.refresh_secret_key(previous_validity)
-
-	def calc_current_signature(self, contents):
-		return token.calc_current_signature(contents)
-
-	def generate_token(self, claims):
-		return token.generate_token(claims)
-
 	def validate_token(self, token_str):
-		return token,validate_token(token_str)
+		return token.validate_token(token_str)
 
 #------------------------------------------------------------
 

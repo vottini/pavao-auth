@@ -21,7 +21,7 @@ internationalization = pavao.Internationalization(
 #-------------------------------------------------------------------------------
 
 @pavao.generates_json(file_blueprint=blueprints, with_root="tokenInfo")
-async def process(request, response, pg_connection):
+async def process(request, response, pg_connection, token_methods):
 	accepted_languages = request.parse_locale_priority()
 	localizer = internationalization.create_localizer(accepted_languages)
 	token = request.cookies.get('token')
@@ -32,7 +32,7 @@ async def process(request, response, pg_connection):
 			"MISSING_TOKEN"
 		)
 
-	refresh_claims = pavao.validate_token(token)
+	refresh_claims = token_methods.validate_token(token)
 
 	if refresh_claims is None:
 		response.set_status(400)
@@ -92,8 +92,8 @@ async def process(request, response, pg_connection):
 		await pg_connection.execute(insert_refresh, account_id, refresh_hash,
 			refresh_expiry, access_claims['jti'])
 
-	access_token = pavao.generate_token(access_claims)
-	refresh_token = pavao.generate_token(refresh_claims)
+	access_token = token_methods.generate_token(access_claims)
+	refresh_token = token_methods.generate_token(refresh_claims)
 
 	response.add_cookie(
 		pavao.http.Cookie('token', refresh_token)

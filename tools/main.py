@@ -22,7 +22,7 @@ action_group.add_argument("--create-admin",
 	action="store_true")
 
 action_group.add_argument("--import-admin",
-	help="creates an admin account using the given properties FILE as specification",
+	help="creates an admin account using the given YAML file as specification",
 	action="store", metavar="FILE", type=str)
 
 args = cli_parser.parse_args()

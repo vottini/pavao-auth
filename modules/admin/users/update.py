@@ -4,45 +4,29 @@ import asyncpg
 import humps
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-options_blueprint = """
+update_user = pavao.include("../queries/update_user.sql")
+blueprints = pavao.path_to("../blueprints.jbp")
 
-	root {
-		optional login: string (minLength=4),
-		optional firstName: string (minLength=2),
-		optional lastName: nullable string (minLength=2)
-	}
-
-"""
-
-
-@pavao.accepts_json(string_blueprint=options_blueprint)
-async def process(request, response, parsed_json, db_connection, path_variables):
+@pavao.accepts_json(file_blueprint=blueprints, with_root="userUpdate")
+async def process(request, response, parsed_json, pg_connection, path_variables):
 	message_localizer = create_message_localizer(request)
 	userId = path_variables['userId']
 
-	async with db_connection.transaction():
+	async with pg_connection.transaction():
 		for column in ("login", "firstName", "lastName"):
 			if not pavao.has_optional_field(parsed_json, column):
 				continue
 
 			snake_case_column = humps.decamelize(column)
-
-			query = f"""
-
-				UPDATE pavao."account"
-					set {snake_case_column} = $1
-					WHERE
-						id = $2 AND
-						COALESCE({snake_case_column}, '') <> COALESCE($1, '');
-
-			"""
+			query = update_user.format(column_name=snake_case_column)
 
 			try:
-				await db_connection.execute(query,
+				await pg_connection.execute(query,
 					getattr(parsed_json, column),
 					userId)
 
