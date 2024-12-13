@@ -1,6 +1,9 @@
 
-type userId: integer (min=0)
-type roleId: integer (min=0)
+type positiveInteger : integer (min=0)
+
+type userId: positiveInteger
+type roleId: positiveInteger
+type funcId: positiveInteger
 
 type saneName: string (minLength=2)
 type saneLogin: string(minLength=4, format="^[a-z][a-z0-9]*(?:.[a-z0-9]+)?$")
@@ -60,3 +63,46 @@ object userUpdate {
 	optional lastName: nullable saneName
 }
 
+object roleInfo {
+	id: roleId,
+	name: saneName,
+	description: nullable string
+}
+
+object fullRoleData {
+	name: saneName,
+	description: nullable string,
+
+	users: {
+		id: userId,
+		fullName: string
+	} [],
+
+	functionalities: {
+		id: funcId,
+		name: string,
+		package: nullable string
+	} []
+}
+
+object roleCreationData  {
+	name: saneName,
+	optional description: string
+}
+
+object roleUpdate {
+	optional name: saneName,
+	optional description: string
+}
+
+object roleAccesses {
+	name: saneName,
+	accesses: {
+		package: nullable string,
+		functionalities: {
+			id: funcId,
+			functionality: string,
+			accessable: bool
+		} []
+	} []
+}

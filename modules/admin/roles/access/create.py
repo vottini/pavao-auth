@@ -3,27 +3,22 @@ import asyncio
 import asyncpg
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-allow_query = """
+insert_role_access = pavao.include("../../queries/insert_role_access.sql")
 
-	INSERT INTO pavao."access" (functionality, "role")
-		VALUES ($1, $2)
-
-"""
-
-async def process(request, response, db_connection, path_variables, server):
+async def process(request, response, pg_connection, path_variables, authorizer):
 	message_localizer = create_message_localizer(request)
 
 	try:
-		await db_connection.execute(allow_query,
+		await pg_connection.execute(insert_role_access,
 			path_variables['functionality'],
 			path_variables['role'])
 
-		authorizer = server.authorizer
-		await authorizer.allow_access(db_connection,
+		await authorizer.allow_access(pg_connection,
 			path_variables['functionality'],
 			path_variables['role'])
 

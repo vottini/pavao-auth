@@ -2,23 +2,18 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-disallow_query = """
+remove_role_access = pavao.include("../../queries/remove_role_access.sql")
 
-	DELETE FROM pavao."access"
-		WHERE functionality = $1 AND "role" = $2
-		RETURNING "role";
-
-"""
-
-async def process(request, response, db_connection, path_variables, server):
+async def process(request, response, pg_connection, path_variables, authorizer):
 	message_localizer = create_message_localizer(request)
 
 	try:
-		deleted = await db_connection.fetchval(disallow_query,
+		deleted = await pg_connection.fetchval(remove_role_access,
 			path_variables['functionality'],
 			path_variables['role'])
 
@@ -27,8 +22,7 @@ async def process(request, response, db_connection, path_variables, server):
 			message_localizer.assign_response_error(response, "ROLE_NOT_FOUND")
 			return
 
-		authorizer = server.authorizer
-		await authorizer.remove_access(db_connection,
+		await authorizer.remove_access(pg_connection,
 			path_variables['functionality'],
 			path_variables['role'])
 

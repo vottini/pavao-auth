@@ -3,32 +3,18 @@ import asyncio
 import asyncpg
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
-from admin.common import capitalize
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('capitalize')
+	.import_item('localizer'))
 
-add_role = """
+add_role = pavao.include("../queries/add_role.sql")
+blueprints = pavao.path_to("../blueprints.jbp")
 
-	INSERT INTO
-		pavao."role" (name, description)
-		VALUES ($1, $2)
-		RETURNING id;
-
-"""
-
-role_blueprint = """
-
-	root {
-		name: string (minLength=2),
-		optional description: string
-	}
-
-"""
-
-@pavao.generates_json(string_blueprint="root integer")
-@pavao.accepts_json(string_blueprint=role_blueprint)
-async def process(request, response, parsed_json, db_connection):
+@pavao.generates_json(file_blueprint=blueprints, with_root="roleId")
+@pavao.accepts_json(file_blueprint=blueprints, with_root="roleCreationData")
+async def process(request, response, parsed_json, pg_connection):
 	message_localizer = create_message_localizer(request)
 
 	description = (parsed_json.description.strip()
@@ -36,7 +22,7 @@ async def process(request, response, parsed_json, db_connection):
 		else None)
 
 	try:
-		roleId = await db_connection.fetchval(add_role,
+		roleId = await pg_connection.fetchval(add_role,
 			capitalize(parsed_json.name),
 			description)
 

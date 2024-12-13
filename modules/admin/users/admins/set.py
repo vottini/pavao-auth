@@ -20,7 +20,7 @@ blueprints = pavao.path_to("../../blueprints.jbp")
 async def process(request, response, parsed_json, pg_connection, auth_data):
 	parsed_json.append(auth_data.account_id)
 
-	async with db_connection.transaction():
+	async with pg_connection.transaction():
 		admin_id = await pg_connection.fetchval(get_admin)
 		await pg_connection.execute(insert_admins, admin_id, parsed_json)
 		await pg_connection.execute(remove_admins, admin_id, parsed_json)
