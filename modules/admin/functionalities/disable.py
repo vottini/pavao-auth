@@ -2,29 +2,19 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-check_admin = """
-
-	SELECT COUNT(*) FROM
-		pavao.functionality func
-			INNER JOIN pavao."access" acc ON acc.functionality = func.id
-			INNER JOIN pavao."role" rl ON acc."role" = rl.id
-
-		WHERE
-			func.id = $1 AND
-			rl.admin;
-
-"""
+count_admin_accesses = pavao.include("../queries/count_admin_accesses.sql")
 
 
-async def process(request, response, db_connection, path_variables, server):
+async def process(request, response, pg_connection, path_variables, authorizer):
 	message_localizer = create_message_localizer(request)
 
 	functionality_id = path_variables['functionality']
-	admin_roles = await db_connection.fetchval(check_admin,
+	admin_roles = await pg_connection.fetchval(count_admin_accesses,
 		functionality_id)
 
 	if admin_roles > 0:
@@ -32,8 +22,7 @@ async def process(request, response, db_connection, path_variables, server):
 		response.set_status(403)
 		return
 
-	authorizer = server.authorizer
-	success = await authorizer.disable_functionality(db_connection,
+	success = await authorizer.disable_functionality(pg_connection,
 		functionality_id)
 
 	if not success:

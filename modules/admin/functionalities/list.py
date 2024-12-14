@@ -2,42 +2,23 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('localizer'))
 
-list_functionalities = """
+list_functionalities = pavao.include("../queries/list_functionalities.sql")
+blueprints = pavao.path_to("../blueprints.jbp")
 
-	SELECT
-		id,
-		COALESCE(package, '') AS package,
-		name AS functionality,
-		enabled,
-		active
 
-		FROM pavao.functionality;
+@pavao.generates_json(
+	file_blueprint=blueprints,
+	with_root="packageFunctionalities",
+	array_root=True)
 
-"""
-
-functionalities_list = """
-
-	root {
-		package: nullable string,
-		functionalities: {
-			id: integer,
-			functionality: string,
-			enabled: bool,
-			active: bool
-		} []
-	} []
-
-"""
-
-@pavao.generates_json(string_blueprint=functionalities_list)
-async def process(request, db_connection, server):
-	functionalities = await db_connection.fetch(list_functionalities)
-	authorizer = server.authorizer
-
+async def process(request, pg_connection, authorizer):
+	functionalities = await pg_connection.fetch(list_functionalities)
 	grouped = dict()
+
 	for functionality in functionalities:
 		package_code = functionality['package']
 		package = authorizer.get_package_translation(package_code, request)
@@ -48,6 +29,7 @@ async def process(request, db_connection, server):
 			package_code, functionality['functionality'],
 			request)
 
+		specs['active'] = True
 		package_funcs.append(specs)
 		grouped[package] = package_funcs
 

@@ -2,13 +2,13 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-async def process(request, response, db_connection, path_variables, server):
-	authorizer = server.authorizer
-	success = await authorizer.enable_functionality(db_connection,
+async def process(request, response, pg_connection, path_variables, authorizer):
+	success = await authorizer.enable_functionality(pg_connection,
 		path_variables['functionality'])
 
 	if not success:

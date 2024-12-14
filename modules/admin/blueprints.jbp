@@ -106,3 +106,21 @@ object roleAccesses {
 		} []
 	} []
 }
+
+object packageFunctionalities {
+	package: nullable string,
+
+	functionalities: {
+		id: funcId,
+		functionality: string,
+		enabled: bool,
+		active: bool
+	} []
+}
+
+object allowedFunctionality {
+	package: string,
+	functionality: string,
+	allowingRole: string
+}
+
