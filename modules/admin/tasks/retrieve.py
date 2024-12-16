@@ -2,33 +2,24 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-task_blueprint = """
+blueprints = pavao.path_to("../blueprints.jbp")
 
-	root {
-		package: nullable string,
-		name: string,
-		schedule: string,
-		enabled: bool,
-		optional nextExecution: instant,
-		running: bool
-	}
-
-"""
-
-@pavao.generates_json(string_blueprint=task_blueprint)
+@pavao.generates_json(file_blueprint=blueprints, with_root="functionalityInfo")
 async def process(request, response, path_variables, server):
 	task_data = server.scheduler.get_task(path_variables['task'])
 	localization_priority = request.parse_locale_priority()
 
 	if task_data is None:
-		message_localizer = create_message_localizer(request)
-		message_localizer.assign_response_error(response, "TASK_NOT_FOUND")
 		response.set_status(404)
-		return None
+		message_localizer = create_message_localizer(request)
+		return message_localizer.create_error(
+			"TASK_NOT_FOUND"
+		)
 
 	result = {
 		'name': task_data.localized_name(localization_priority),

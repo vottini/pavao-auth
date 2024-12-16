@@ -2,9 +2,10 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
 def process(request, response, path_variables, server):
 	success, outcome = server.scheduler.run_task(path_variables['task'])

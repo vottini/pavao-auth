@@ -2,11 +2,18 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
-@pavao.generates_json(string_blueprint="root string[]")
+blueprints = pavao.path_to("../blueprints.jbp")
+
+@pavao.generates_json(
+	file_blueprint=blueprints,
+	with_root="string",
+	array_root=True)
+
 async def process(request, response, path_variables, server):
 	task_data = server.scheduler.get_task(path_variables['task'])
 

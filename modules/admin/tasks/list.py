@@ -2,23 +2,18 @@
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('localizer'))
 
-tasks_list = """
+blueprints = pavao.path_to("../blueprints.jbp")
 
-	root {
-		package: string,
-		tasks: {
-			id: integer,
-			name: string,
-			enabled: bool
-		} []
-	} []
 
-"""
+@pavao.generates_json(
+	file_blueprint=blueprints,
+	with_root="packageInfo",
+	array_root=True)
 
-@pavao.generates_json(string_blueprint=tasks_list)
 async def process(server, request):
 	localization_priority = request.parse_locale_priority()
 	grouped = dict()
@@ -30,7 +25,7 @@ async def process(server, request):
 		grouped[package] = package_funcs
 
 	return [
-		{'package': package, 'tasks': tasks}
+		{ 'package': package, 'tasks': tasks }
 		for package, tasks in grouped.items()
 	]
 

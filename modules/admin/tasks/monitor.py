@@ -3,8 +3,10 @@ import re
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import assert_admin_access
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('localizer'))
+
 
 atomic_messages = {
 	'STARTED': 'taskStart',

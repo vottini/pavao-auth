@@ -124,3 +124,38 @@ object allowedFunctionality {
 	allowingRole: string
 }
 
+
+object packageInfo {
+	package: string,
+
+	tasks: {
+		id: funcId,
+		name: string,
+		enabled: bool
+	} []
+}
+
+object functionalityInfo {
+	package: nullable string,
+	name: string,
+	schedule: string,
+	enabled: bool,
+	optional nextExecution: instant,
+	running: bool
+}
+
+object updatedSchedule {
+	nextExecution: instant
+}
+
+object taskExecution {
+	start: instant,
+	finish: instant,
+	success: bool,
+
+	outputs: {
+		instant: instant(iso=true),
+		content: string
+	} []
+}
+

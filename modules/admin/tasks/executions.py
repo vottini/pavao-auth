@@ -4,66 +4,41 @@ import datetime
 import asyncio
 import pavao
 
-from admin.common import localizer
-from admin.common import create_message_localizer
-from admin.common import assert_admin_access
-
-select_executions = """
-
-	SELECT
-		id,
- 		success,
-		execution_start AS "start",
-		execution_end AS "finish"
-
-	FROM pavao.task_execution
-
-	WHERE
-		DATE(execution_start) = $2 AND
-		execution_end IS NOT NULL AND
-		task = $1;
-
-"""
-
-retrieve_outputs = """
-
-	SELECT instant, content
-		FROM pavao.task_output
-
-		WHERE
-			task = $1 AND
-			instant > $2 AND
-			instant < $3;
-
-"""
-
-executions_blueprint = """
-
-	root {
-		start: instant,
-		finish: instant,
-		success: bool,
-
-		outputs: {
-			instant: instant(iso=true),
-			content: string
-		} []
-	} []
-
-"""
+(pavao.from_module('../common')
+	.import_item('assert_admin_access')
+	.import_item('create_message_localizer')
+	.import_item('localizer'))
 
 day_pattern = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+list_task_executions = pavao.include("../queries/list_task_executions.sql")
+retrieve_task_output = pavao.include("../queries/retrieve_task_output.sql")
+blueprints = pavao.path_to("../blueprints.jbp")
 
 #-------------------------------------------------------------------------------
 
-def make_datetime(day_str):
-	return datetime.datetime.strptime(
-		day_str, "%Y-%m-%d")
+def map_execution(row):
+	return {
+		'id': row[0],
+		'success': row[1],
+		'start': row[2],
+		'finish': row[3]
+	}
 
+def map_output(row):
+	return {
+		'instant': row[0],
+		'content': row[1]
+	}
 
-@pavao.generates_json(string_blueprint=executions_blueprint)
+#-------------------------------------------------------------------------------
+
+@pavao.generates_json(
+	file_blueprint=blueprints,
+	with_root="taskExecution",
+	array_root=True)
+
 @pavao.accepts_parameters({'day': str})
-async def process(request, response, parameters, db_connection, path_variables):
+async def process(request, response, parameters, internal_db, path_variables):
 	day = parameters['day']
 
 	if day_pattern.match(day) is None:
@@ -73,27 +48,34 @@ async def process(request, response, parameters, db_connection, path_variables):
 			"INVALID_DAY"
 		)
 
-	task_id = path_variables['task']
-	found = await db_connection.fetch(
-		select_executions, task_id,
-		make_datetime(day))
+	async with internal_db.execute(
+		list_task_executions, {
+			'task': path_variables['task'],
+			'start': day
+		}) as cursor:
+
+		found = [ map_execution(row)
+			for row in await cursor.fetchall()
+		]
 
 	outputs = dict()
 	for execution in found:
 		ident = execution['id']
 
-		outputs[ident] = await db_connection.fetch(
-			retrieve_outputs, task_id,
-			execution['start'],
-			execution['finish']
-		)
+		async with internal_db.execute(
+			retrieve_task_output,
+			[ident]) as cursor:
+
+			outputs[ident] = [ map_output(row)
+				for row in await cursor.fetchall()
+			]
 
 	return [
 		pavao.assemble_dicts(execution,
-			outputs=[pavao.assemble_dicts(output)
+			outputs=[
+				pavao.assemble_dicts(output)
 				for output in outputs.get(execution['id'], list())
-			]
-		)
+			])
 
 		for execution in found
 	]
