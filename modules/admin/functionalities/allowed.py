@@ -2,18 +2,18 @@
 import asyncio
 import pavao
 
-(pavao.from_module('../common')
+(pavao.from_module('../common.py')
 	.import_item('assert_admin_access')
 	.import_item('localizer'))
 
-
-retrieve_roles_functionalities = pavao.include("../queries/retrieve_roles_functionalities.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
-
+retrieve_roles_functionalities = pavao.include(
+	"../queries/retrieve_roles_functionalities.sql"
+)
 
 @pavao.generates_json(
 	file_blueprint=blueprints,
-	with_root="allowedFunctionality",
+	with_root="AllowedFunctionality",
 	array_root=True)
 
 @pavao.accepts_parameters({'roles': [int]})

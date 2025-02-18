@@ -34,7 +34,7 @@ def map_output(row):
 
 @pavao.generates_json(
 	file_blueprint=blueprints,
-	with_root="taskExecution",
+	with_root="TaskExecution",
 	array_root=True)
 
 @pavao.accepts_parameters({'day': str})
@@ -71,8 +71,7 @@ async def process(request, response, parameters, internal_db, path_variables):
 			]
 
 	return [
-		pavao.assemble_dicts(execution,
-			outputs=[
+		pavao.assemble_dicts(execution, outputs=[
 				pavao.assemble_dicts(output)
 				for output in outputs.get(execution['id'], list())
 			])

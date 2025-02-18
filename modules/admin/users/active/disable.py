@@ -22,8 +22,12 @@ async def process(request, response, pg_connection, path_variables, auth_data):
 		enable_user, target_user, False)
 
 	if len(disabled) == 0:
-		message_localizer.assign_response_error(response, "USER_NOT_FOUND")
 		response.set_status(404)
+		message_localizer.assign_response_error(response,
+			"USER_NOT_FOUND")
+
+	else:
+		response.set_status(204)
 
 
 @assert_admin_access

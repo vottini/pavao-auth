@@ -9,6 +9,7 @@ import pavao
 
 remove_admin = pavao.include("../../queries/remove_admin.sql")
 
+
 async def process(request, response, pg_connection, path_variables, auth_data):
 	message_localizer = create_message_localizer(request)
 	revoked_user = path_variables['user']

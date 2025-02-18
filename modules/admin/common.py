@@ -4,18 +4,22 @@ import functools
 import pavao
 
 localization_dir = pavao.path_to("localization")
-
-#------------------------------------------------------------------------------
-
 functionalities_path = os.path.join(localization_dir, 'functionalities')
 localizer = pavao.ModuleLocalizer("ADMIN", functionalities_path)
 package_mapper = localizer.map("PACKAGE")
 
+messages_path = os.path.join(localization_dir, 'messages')
+messages_i18n = pavao.Internationalization(messages_path)
+
+def create_message_localizer(request):
+	accepted_languages = request.parse_locale_priority()
+	return messages_i18n.create_localizer(accepted_languages)
+
+#------------------------------------------------------------------------------
 
 search_functionality = pavao.include("queries/search_functionality.sql")
 insert_functionality = pavao.include("queries/insert_functionality.sql")
 insert_admin_access = pavao.include("queries/insert_admin_access.sql")
-
 
 def assert_admin_access(fnc):
 
@@ -33,37 +37,27 @@ def assert_admin_access(fnc):
 		if not isinstance(result, dict):
 			return result
 
-		package_mapper = result.get("package")
 		func_mapper = result.get("functionality")
-		if None in (package_mapper, func_mapper):
+		if None == func_mapper:
 			return result
 
-		func_id = await pg_connection.fetchval(search_functionality,
-			package_mapper.identity(),
-			func_mapper.identity())
+		async with pg_connection.transaction():
+			func_id = await pg_connection.fetchval(search_functionality,
+				package_mapper.identity(),
+				func_mapper.identity())
 
-		if func_id is None:
-			async with pg_connection.transaction():
+			if func_id is None:
 				func_id = await pg_connection.fetchval(insert_functionality,
 					package_mapper.identity(),
 					func_mapper.identity())
 
-		await pg_connection.execute(
-			insert_admin_access,
-			func_id)
+			await pg_connection.execute(
+				insert_admin_access,
+				func_id)
 
 		return result
 
 	return wrapped
-
-#------------------------------------------------------------------------------
-
-messages_path = os.path.join(localization_dir, 'messages')
-messages_i18n = pavao.Internationalization(messages_path)
-
-def create_message_localizer(request):
-	accepted_languages = request.parse_locale_priority()
-	return messages_i18n.create_localizer(accepted_languages)
 
 #------------------------------------------------------------------------------
 

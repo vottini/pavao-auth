@@ -22,8 +22,8 @@ internationalization = pavao.Internationalization(
 
 #-------------------------------------------------------------------------------
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="tokenInfo")
-@pavao.accepts_json(file_blueprint=blueprints, with_root="credentials")
+@pavao.generates_json(file_blueprint=blueprints, with_root="TokenInfo")
+@pavao.accepts_json(file_blueprint=blueprints, with_root="Credentials")
 async def process(request, response, pg_connection, token_methods, parsed_json):
 	localizer = internationalization.create_localizer(
 		request.parse_locale_priority())
@@ -85,7 +85,7 @@ async def process(request, response, pg_connection, token_methods, parsed_json):
 
 		return {
 			"token": access_token,
-			"change_password": True,
+			"changePassword": True,
 			"expires": access_claims['exp']
 		}
 
@@ -122,7 +122,7 @@ async def process(request, response, pg_connection, token_methods, parsed_json):
 
 	return {
 		"token": access_token,
-		"change_password": False,
+		"changePassword": False,
 		"expires": access_claims['exp']
 	}
 

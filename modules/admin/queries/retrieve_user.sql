@@ -1,5 +1,6 @@
 
 SELECT
+	id,
 	login,
 	first_name,
 	last_name,

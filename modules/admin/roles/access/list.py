@@ -12,7 +12,7 @@ list_role_accesses = pavao.include("../../queries/list_role_accesses.sql")
 blueprints = pavao.path_to("../../blueprints.jbp")
 
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="roleAccesses")
+@pavao.generates_json(file_blueprint=blueprints, with_root="RoleAccesses")
 async def process(request, response, pg_connection, path_variables, authorizer):
 	role_id = path_variables['role']
 
@@ -27,29 +27,31 @@ async def process(request, response, pg_connection, path_variables, authorizer):
 			response.set_status(404)
 			return
 
-		accesses = await pg_connection.fetch(
+		funcs = await pg_connection.fetch(
 			list_role_accesses,
 			role_id)
 
-	grouped = dict()
-	for functionality in accesses:
-		package_code = functionality['package']
-		package = authorizer.get_package_translation(package_code, request)
-		package_funcs = grouped.get(package, list())
+	accessable = list()
+	forbidden = list()
 
-		specs = dict(functionality)
-		specs["functionality"] = authorizer.get_func_translation(
+	for functionality in funcs:
+		package_code = functionality['package']
+		specs = dict()
+
+		specs["id"] = functionality["id"]
+		specs["package"] = authorizer.get_package_translation(package_code, request)
+		specs["name"] = authorizer.get_func_translation(
 			package_code, functionality['functionality'],
 			request)
 
-		package_funcs.append(specs)
-		grouped[package] = package_funcs
+		container = accessable if functionality["accessable"] else forbidden
+		container.append(specs)
 
 	return {
+		"id": role_id,
 		"name": role_info['name'],
-		"accesses": [{'package': package, 'functionalities': funcs}
-			for package, funcs in grouped.items()
-		]
+		"accessable": accessable,
+		"forbidden": forbidden
 	}
 
 

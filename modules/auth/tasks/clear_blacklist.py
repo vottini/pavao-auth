@@ -2,7 +2,7 @@
 import asyncio
 import pavao
 
-pavao.from_module("common").import_item("localizer")
+pavao.from_module("common.py").import_item("localizer")
 
 async def proccess(authorizer):
 	removed = authorizer.clear_blacklist()

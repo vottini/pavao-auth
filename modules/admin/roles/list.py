@@ -9,9 +9,10 @@ import pavao
 list_roles = pavao.include("../queries/list_roles.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
 
+
 @pavao.generates_json(
 	file_blueprint=blueprints,
-	with_root="roleInfo",
+	with_root="RoleInfo",
 	array_root=True)
 
 async def process(pg_connection):

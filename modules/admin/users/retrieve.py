@@ -11,7 +11,8 @@ retrieve_user = pavao.include("../queries/retrieve_user.sql")
 retrieve_user_roles = pavao.include("../queries/retrieve_user_roles.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="fullUserData")
+
+@pavao.generates_json(file_blueprint=blueprints, with_root="UserRoles")
 async def process(request, pg_connection, path_variables):
 	user_id = path_variables['user']
 
@@ -20,10 +21,9 @@ async def process(request, pg_connection, path_variables):
 		user_id)
 
 	if user_info is None:
-		localizer = create_message_localizer(request)
-		localizer.assign_response_error(response, "USER_NOT_FOUND")
 		response.set_status(404)
-		return
+		message_localizer = create_message_localizer(request)
+		return message_localizer.create_error("USER_NOT_FOUND")
 
 	roles = await pg_connection.fetch(
 		retrieve_user_roles,

@@ -9,7 +9,7 @@ import pavao
 
 blueprints = pavao.path_to("../blueprints.jbp")
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="functionalityInfo")
+@pavao.generates_json(file_blueprint=blueprints, with_root="TaskInfo")
 async def process(request, response, path_variables, server):
 	task_data = server.scheduler.get_task(path_variables['task'])
 	localization_priority = request.parse_locale_priority()

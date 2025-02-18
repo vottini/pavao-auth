@@ -12,8 +12,8 @@ import pavao
 add_role = pavao.include("../queries/add_role.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="roleId")
-@pavao.accepts_json(file_blueprint=blueprints, with_root="roleCreationData")
+@pavao.generates_json(file_blueprint=blueprints, with_root="RoleId")
+@pavao.accepts_json(file_blueprint=blueprints, with_root="RoleCreation")
 async def process(request, response, parsed_json, pg_connection):
 	message_localizer = create_message_localizer(request)
 
@@ -30,14 +30,6 @@ async def process(request, response, parsed_json, pg_connection):
 		response.set_status(409)
 		return message_localizer.create_error(
 			"ROLE_EXISTS"
-		)
-
-	except asyncpg.PostgresError as e:
-		pavao.Logger.error(f"Error creating class: {e}")
-
-		response.set_status(500)
-		return message_localizer.create_error(
-			"UNEXPECTED_ERROR"
 		)
 
 	response.set_status(201)

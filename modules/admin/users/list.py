@@ -2,16 +2,17 @@
 import asyncio
 import pavao
 
-(pavao.from_module('../common')
+(pavao.from_module('../common.py')
 	.import_item('assert_admin_access')
 	.import_item('localizer'))
 
-list_users = pavao.include("../queries/list_users.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
+list_users = pavao.include("../queries/list_users.sql")
+
 
 @pavao.generates_json(
 	file_blueprint=blueprints,
-	with_root="userInfo",
+	with_root="UserInfo",
 	array_root=True)
 
 async def process(auth_data, pg_connection):

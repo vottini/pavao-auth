@@ -10,16 +10,16 @@ import pavao
 	.import_item('capitalize')
 	.import_item('localizer'))
 
-
 add_user = pavao.include("../queries/add_user.sql")
 add_authentication = pavao.include("../queries/add_authentication.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="userId")
-@pavao.accepts_json(file_blueprint=blueprints, with_root="userCreationData")
+
+@pavao.generates_json(file_blueprint=blueprints, with_root="UserId")
+@pavao.accepts_json(file_blueprint=blueprints, with_root="UserCreation")
 async def process(request, response, pg_connection, parsed_json):
 	hashedPassword = argon2.PasswordHasher().hash(parsed_json.password)
-	localizer = create_message_localizer(request)
+	message_localizer = create_message_localizer(request)
 
 	user_args = (
 		parsed_json.login.lower(),
@@ -37,16 +37,8 @@ async def process(request, response, pg_connection, parsed_json):
 
 	except asyncpg.UniqueViolationError as e:
 		response.set_status(409)
-		return localizer.create_message(
+		return message_localizer.create_message(
 			"LOGIN_EXISTS"
-		)
-
-	except asyncpg.PostgresError as e:
-		pavao.Logger.error(f"Error creating user: {e}")
-
-		response.set_status(500)
-		return localizer.create_message(
-			"UNEXPECTED_ERROR"
 		)
 
 	response.set_status(201)

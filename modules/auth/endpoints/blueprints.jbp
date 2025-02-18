@@ -1,32 +1,32 @@
 
-type password: string (minLength=8, maxLength=128)
+type Password: String(minLength=8, maxLength=128)
 
-object credentials {
-	login: string (minLength=2, maxLength=128),
-	password: password
+object Credentials {
+	login: String(minLength=2, maxLength=128),
+	password: Password
 }
 
-object tokenInfo {
-	token: string,
-	change_password: bool,
-	expires: integer
+object TokenInfo {
+	token: String,
+	changePassword: Bool,
+	expires: Integer
 }
 
-object passwordUpdate {
-	oldPassword: password,
-	newPassword: password
+object PasswordUpdate {
+	oldPassword: Password,
+	newPassword: Password
 }
 
-object access {
-	package: nullable string,
-	functionality: string
+object Access {
+	package: nullable String,
+	functionality: String
 }
 
-object userInfo {
-	id: integer,
-	firstName: string,
-	lastName: nullable string,
-	administrator: bool,
-	accesses: access[]
+object UserInfo {
+	id: Integer,
+	firstName: String,
+	lastName: nullable String,
+	administrator: Bool,
+	accesses: Access[]
 }
 

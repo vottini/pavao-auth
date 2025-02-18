@@ -14,7 +14,6 @@ atomic_messages = {
 	'DISABLED': 'taskDisabled'
 }
 
-
 parametered_messages = {
 	'taskOutput': re.compile(r"OUTPUT:(.*)"),
 	'taskSchedule': re.compile(r"SCHEDULE:(.*)"),

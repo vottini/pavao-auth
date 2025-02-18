@@ -11,7 +11,7 @@ blueprints = pavao.path_to("../blueprints.jbp")
 
 @pavao.generates_json(
 	file_blueprint=blueprints,
-	with_root="packageInfo",
+	with_root="PackageTasks",
 	array_root=True)
 
 async def process(server, request):

@@ -3,7 +3,7 @@ import datetime
 import asyncio
 import pavao
 
-pavao.from_module("common").import_item("localizer")
+pavao.from_module("common.py").import_item("localizer")
 
 async def proccess(token_methods):
 	validity = datetime.timedelta(days=5)

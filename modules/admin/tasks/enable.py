@@ -10,7 +10,7 @@ import pavao
 enable_task = pavao.include("../queries/enable_task.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="updatedSchedule")
+@pavao.generates_json(file_blueprint=blueprints, with_root="UpdatedSchedule")
 async def process(request, response, path_variables, internal_db, server, broadcasting):
 	task_data = server.scheduler.get_task(path_variables['task'])
 

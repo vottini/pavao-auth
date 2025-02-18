@@ -254,8 +254,7 @@ class Authorizer:
 
 	def get_func_translation(self, package, functionality, request):
 		accepted_languages = request.parse_locale_priority()
-		mapping = self.functionalities.get(
-			(package, functionality))
+		mapping = self.functionalities.get((package, functionality))
 
 		return (mapping.localize(accepted_languages)
 			if isinstance(mapping, LazyLocalizer)

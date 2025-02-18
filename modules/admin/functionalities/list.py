@@ -12,7 +12,7 @@ blueprints = pavao.path_to("../blueprints.jbp")
 
 @pavao.generates_json(
 	file_blueprint=blueprints,
-	with_root="packageFunctionalities",
+	with_root="PackageFunctionalities",
 	array_root=True)
 
 async def process(request, pg_connection, authorizer):
@@ -21,15 +21,14 @@ async def process(request, pg_connection, authorizer):
 
 	for functionality in functionalities:
 		package_code = functionality['package']
-		package = authorizer.get_package_translation(package_code, request)
-		package_funcs = grouped.get(package, list())
 
 		specs = dict(functionality)
 		specs["functionality"] = authorizer.get_func_translation(
 			package_code, functionality['functionality'],
 			request)
 
-		specs['active'] = True
+		package = authorizer.get_package_translation(package_code, request)
+		package_funcs = grouped.get(package, list())
 		package_funcs.append(specs)
 		grouped[package] = package_funcs
 

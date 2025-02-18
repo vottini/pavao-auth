@@ -2,10 +2,11 @@
 import asyncio
 import pavao
 
-(pavao.from_module('../common')
+(pavao.from_module('../common.py')
 	.import_item('assert_admin_access')
 	.import_item('create_message_localizer')
 	.import_item('localizer'))
+
 
 async def process(request, response, pg_connection, path_variables, authorizer):
 	success = await authorizer.enable_functionality(pg_connection,

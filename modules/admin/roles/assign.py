@@ -3,19 +3,19 @@ import asyncio
 import asyncpg
 import pavao
 
-(pavao.from_module('../../common')
+(pavao.from_module('../common')
 	.import_item('assert_admin_access')
 	.import_item('create_message_localizer')
 	.import_item('localizer'))
 
-assign_role_users = pavao.include("../../queries/assign_role_users.sql")
-revoke_role_users = pavao.include("../../queries/revoke_role_users.sql")
-blueprints = pavao.path_to("../../blueprints.jbp")
+assign_role_users = pavao.include("../queries/assign_role_users.sql")
+revoke_role_users = pavao.include("../queries/revoke_role_users.sql")
+blueprints = pavao.path_to("../blueprints.jbp")
 
 
 @pavao.accepts_json(
 	file_blueprint=blueprints,
-	with_root="userId",
+	with_root="UserId",
 	array_root=True)
 
 async def process(request, response, parsed_json, path_variables, pg_connection):

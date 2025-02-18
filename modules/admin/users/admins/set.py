@@ -14,7 +14,7 @@ blueprints = pavao.path_to("../../blueprints.jbp")
 
 @pavao.accepts_json(
 	file_blueprint=blueprints,
-	with_root="userId",
+	with_root="UserId",
 	array_root=True)
 
 async def process(request, response, parsed_json, pg_connection, auth_data):

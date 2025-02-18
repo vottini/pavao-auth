@@ -9,22 +9,19 @@ import pavao
 
 remove_role = pavao.include("../queries/remove_role.sql")
 
+
 async def process(request, response, pg_connection, path_variables):
 	message_localizer = create_message_localizer(request)
+	deleted = await pg_connection.fetchval(remove_role,
+		path_variables['roleId'])
 
-	try:
-		deleted = await pg_connection.fetchval(remove_role,
-			path_variables['roleId'])
+	if deleted is not None:
+		response.set_status(204)
+		return
 
-		if deleted is None:
-			message_localizer.assign_response_error(response, "ROLE_NOT_FOUND")
-			response.set_status(404)
-
-	except Exception as e:
-		pavao.Logger.error(f"Internal error removing role: {e}")
-		message_localizer.assign_response_error(response, "UNEXPECTED_ERROR")
-		response.set_status(500)
-
+	response.set_status(404)
+	message_localizer.assign_response_error(response,
+		"ROLE_NOT_FOUND")
 
 @assert_admin_access
 def pavao_endpoint():

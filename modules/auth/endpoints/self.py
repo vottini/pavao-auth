@@ -6,7 +6,7 @@ select_user = pavao.include('queries/select_user.sql')
 count_admin_roles = pavao.include('queries/count_admin_roles.sql')
 blueprints = pavao.path_to('blueprints.jbp')
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="userInfo")
+@pavao.generates_json(file_blueprint=blueprints, with_root="UserInfo")
 async def process(authorizer, request, pg_connection, auth_data):
 	user_id = auth_data.account_id
 
@@ -20,9 +20,8 @@ async def process(authorizer, request, pg_connection, auth_data):
 	]
 
 	return pavao.assemble_dicts(user_info,
-		administrator=admin_roles > 0,
-		accesses=accesses,
-		id=user_id)
+		administrator=(admin_roles > 0),
+		accesses=accesses)
 
 
 def pavao_endpoint():

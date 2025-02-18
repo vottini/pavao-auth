@@ -12,9 +12,10 @@ import pavao
 update_authentication = pavao.include("../queries/update_authentication.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
 
-@pavao.accepts_json(file_blueprint=blueprints, with_root="passwordUpdate")
+
+@pavao.accepts_json(file_blueprint=blueprints, with_root="PasswordUpdate")
 async def process(request, response, pg_connection, parsed_json, path_variables):
-	localizer = create_message_localizer(request)
+	message_localizer = create_message_localizer(request)
 
 	user_id = path_variables['user']
 	hashed_password = argon2.PasswordHasher().hash(parsed_json.password)
@@ -26,13 +27,13 @@ async def process(request, response, pg_connection, parsed_json, path_variables)
 			user_id, hashed_password, change_afterwards)
 
 		if found_account is None:
-			localizer.assign_response_error(response, "USER_NOT_FOUND")
+			message_localizer.assign_response_error(response, "USER_NOT_FOUND")
 			response.set_status(404)
 			return
 
 	except asyncpg.PostgresError as e:
 		pavao.Logger.error(f"Error changing password: {e}")
-		localizer.assign_response_error(response, "UNEXPECTED_ERROR")
+		message_localizer.assign_response_error(response, "UNEXPECTED_ERROR")
 		response.set_status(500)
 
 

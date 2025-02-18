@@ -8,7 +8,7 @@ WITH role_access AS (
 
 SELECT
 	func.id,
-	COALESCE(func.package, '') AS package,
+	func.package AS package,
 	func.name AS functionality,
 	racs."role" IS NOT NULL AS accessable
 

@@ -23,14 +23,17 @@ async def process(request, response, pg_connection, path_variables, authorizer):
 			path_variables['role'])
 
 	except asyncpg.ForeignKeyViolationError:
-		message_localizer.assign_response_error(response, "ROLE_NOT_FOUND")
 		response.set_status(404)
+		message_localizer.assign_response_error(response,
+			"ROLE_NOT_FOUND")
 
 	except Exception as e:
-		pavao.Logger.error(f"Internal error giving role access: {e}")
-		message_localizer.assign_response_error(response, "UNEXPECTED_ERROR")
 		response.set_status(500)
+		message_localizer.assign_response_error(response,
+			"UNEXPECTED_ERROR")
 
+		pavao.Logger.error(f"Internal error giving role access: {e}")
+		#TODO: log stack trace
 
 @assert_admin_access
 def pavao_endpoint():

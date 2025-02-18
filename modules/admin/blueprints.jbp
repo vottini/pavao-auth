@@ -1,161 +1,157 @@
 
-type positiveInteger : integer (min=0)
+type PositiveInteger: Integer(min=0)
+type NonBlankString: String(minLength=1)
+type SanePassword: String(minLength=8)
 
-type userId: positiveInteger
-type roleId: positiveInteger
-type funcId: positiveInteger
+type UserId: PositiveInteger
+type RoleId: PositiveInteger
+type FuncId: PositiveInteger
 
-type saneName: string (minLength=2)
-type saneLogin: string(minLength=4, format="^[a-z][a-z0-9]*(?:.[a-z0-9]+)?$")
-type sanePassword: string(minLength=8)
+#----------------------------------------------- Users
 
-object userInfo {
-	id: userId,
-	firstName: saneName,
-	lastName: nullable saneName,
-	active: bool,
-	isAdmin: bool,
-	myAccount: bool
+object UserCreation {
+	login: NonBlankString,
+	password: SanePassword,
+	firstName: NonBlankString,
+	optional lastName: NonBlankString,
+	changePassword: Bool
 }
 
-object userAssignmentStatus {
-	firstName: saneName,
-	lastName: nullable saneName,
+object UserUpdate {
+	optional login: NonBlankString,
+	optional firstName: NonBlankString,
+	optional lastName: nullable NonBlankString
+}
 
+object PasswordUpdate {
+	password: SanePassword,
+	optional changePassword: Bool
+}
+
+object CoreUserInfo {
+	id: UserId,
+	login: String,
+	firstName: NonBlankString,
+	lastName: nullable NonBlankString,
+	active: Bool
+}
+
+object UserInfo extends CoreUserInfo {
+	myAccount: Bool,
+	admin: Bool
+}
+
+object UserAssignments extends CoreUserInfo {
 	assignments: {
-		id: roleId,
-		name: string,
-		assigned: bool
+		id: RoleId,
+		name: NonBlankString,
+		assigned: Bool
 	} []
 }
 
-object passwordUpdate {
-	password: sanePassword,
-	optional changePassword: bool
+object FullUserInfo extends CoreUserInfo {
+	creation: Instant,
+	lastLogin: nullable Instant,
+	admin: Bool
 }
 
-object userCreationData {
-	login: saneLogin,
-	password: sanePassword,
-	firstName: saneName,
-	optional lastName: saneName,
-	changePassword: bool
+object BasicUserInfo {
+	id: UserId,
+	fullName: NonBlankString
 }
 
-object fullUserData {
-	login: string,
-	firstName: saneName,
-	lastName: nullable saneName,
-	creation: instant,
-	lastLogin: nullable instant,
-	active: bool,
-	admin: bool,
+#----------------------------------------------- Roles
 
-	roles: {
-		id: roleId,
-		name: string
-	} []
+object RoleCreation {
+	name: NonBlankString,
+	optional description: String
 }
 
-object userUpdate {
-	optional login: saneLogin,
-	optional firstName: saneName,
-	optional lastName: nullable saneName
+object RoleUpdate {
+	optional name: NonBlankString,
+	optional description: NonBlankString
 }
 
-object roleInfo {
-	id: roleId,
-	name: saneName,
-	description: nullable string
+object CoreRoleInfo {
+	id: RoleId,
+	name: NonBlankString
 }
 
-object fullRoleData {
-	name: saneName,
-	description: nullable string,
+object UserRoles extends FullUserInfo {
+	roles: CoreRoleInfo[]
+}
 
-	users: {
-		id: userId,
-		fullName: string
-	} [],
+object RoleInfo extends CoreRoleInfo {
+	description: nullable String
+}
+
+#----------------------------------------------- Functionalities
+
+object FunctionalityInfo {
+	id: FuncId,
+	package: nullable NonBlankString,
+	name: NonBlankString
+}
+
+object FullRoleInfo extends RoleInfo {
+	functionalities: FunctionalityInfo[],
+	users: BasicUserInfo[]
+}
+
+object RoleAccesses extends CoreRoleInfo {
+	accessable: FunctionalityInfo[],
+	forbidden: FunctionalityInfo[]
+}
+
+object PackageFunctionalities {
+	package: nullable NonBlankString,
 
 	functionalities: {
-		id: funcId,
-		name: string,
-		package: nullable string
+		id: FuncId,
+		functionality: NonBlankString,
+		enabled: Bool
 	} []
 }
 
-object roleCreationData  {
-	name: saneName,
-	optional description: string
+object AllowedFunctionality {
+	package: nullable NonBlankString,
+	functionality: String,
+	allowingRole: String
 }
 
-object roleUpdate {
-	optional name: saneName,
-	optional description: string
-}
+#------------------------------------------- Tasks
 
-object roleAccesses {
-	name: saneName,
-	accesses: {
-		package: nullable string,
-		functionalities: {
-			id: funcId,
-			functionality: string,
-			accessable: bool
-		} []
-	} []
-}
-
-object packageFunctionalities {
-	package: nullable string,
-
-	functionalities: {
-		id: funcId,
-		functionality: string,
-		enabled: bool,
-		active: bool
-	} []
-}
-
-object allowedFunctionality {
-	package: string,
-	functionality: string,
-	allowingRole: string
-}
-
-
-object packageInfo {
-	package: string,
+object PackageTasks {
+	package: nullable NonBlankString,
 
 	tasks: {
-		id: funcId,
-		name: string,
-		enabled: bool
+		id: FuncId,
+		name: NonBlankString,
+		enabled: Bool
 	} []
 }
 
-object functionalityInfo {
-	package: nullable string,
-	name: string,
-	schedule: string,
-	enabled: bool,
-	optional nextExecution: instant,
-	running: bool
+object TaskInfo {
+	package: nullable NonBlankString,
+	name: NonBlankString,
+	schedule: NonBlankString,
+	enabled: Bool,
+	running: Bool,
+	optional nextExecution: Instant
 }
 
-object updatedSchedule {
-	nextExecution: instant
+object UpdatedSchedule {
+	nextExecution: Instant
 }
 
-object taskExecution {
-	start: instant,
-	finish: instant,
-	success: bool,
+object TaskExecution {
+	start: Instant,
+	finish: Instant,
+	success: Bool,
 
 	outputs: {
-		instant: instant(iso=true),
-		content: string
+		instant: Instant(iso=true),
+		content: String
 	} []
 }
 

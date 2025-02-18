@@ -15,11 +15,10 @@ blueprints = pavao.path_to("../../blueprints.jbp")
 
 @pavao.accepts_json(
 	file_blueprint=blueprints,
-	with_root="roleId",
+	with_root="RoleId",
 	array_root=True)
 
 async def process(authorizer, request, response, parsed_json, path_variables, pg_connection):
-	message_localizer = create_message_localizer(request)
 	user_id = path_variables['user']
 	roles = parsed_json
 
@@ -31,13 +30,10 @@ async def process(authorizer, request, response, parsed_json, path_variables, pg
 		authorizer.mark_modified(user_id)
 
 	except asyncpg.ForeignKeyViolationError:
-		message_localizer.assign_response_error(response, "USER_NOT_FOUND")
 		response.set_status(404)
-
-	except Exception as e:
-		pavao.Logger.error(f"Internal error assigning user: {e}")
-		message_localizer.assign_response_error(response, "UNEXPECTED_ERROR")
-		response.set_status(500)
+		message_localizer = create_message_localizer(request)
+		message_localizer.assign_response_error(response,
+			"USER_NOT_FOUND")
 
 
 @assert_admin_access

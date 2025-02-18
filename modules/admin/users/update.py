@@ -12,34 +12,27 @@ import pavao
 update_user = pavao.include("../queries/update_user.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
 
-@pavao.accepts_json(file_blueprint=blueprints, with_root="userUpdate")
+
+@pavao.accepts_json(file_blueprint=blueprints, with_root="UserUpdate")
 async def process(request, response, parsed_json, pg_connection, path_variables):
 	message_localizer = create_message_localizer(request)
 	userId = path_variables['userId']
 
 	async with pg_connection.transaction():
-		for column in ("login", "firstName", "lastName"):
+		for column in ("login", "first_name", "last_name"):
 			if not pavao.has_optional_field(parsed_json, column):
 				continue
 
-			snake_case_column = humps.decamelize(column)
-			query = update_user.format(column_name=snake_case_column)
-
 			try:
+				query = update_user.format(column_name=column)
 				await pg_connection.execute(query,
 					getattr(parsed_json, column),
 					userId)
 
 			except asyncpg.UniqueViolationError as e:
-				message_localizer.assign_response_error(response, "LOGIN_EXISTS")
 				response.set_status(409)
-				return
-
-			except asyncpg.PostgresError as e:
-				pavao.Logger.error(f"Internal error updating role: {e}")
-				message_localizer.assign_response_error(response, "UNEXPECTED_ERROR")
-				response.set_status(500)
-				return
+				message_localizer.assign_response_error(response,
+					"LOGIN_EXISTS")
 
 
 @assert_admin_access

@@ -12,7 +12,8 @@ retrieve_role_users = pavao.include("../queries/retrieve_role_users.sql")
 retrieve_role_accesses = pavao.include("../queries/retrieve_role_accesses.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="fullRoleData")
+
+@pavao.generates_json(file_blueprint=blueprints, with_root="FullRoleInfo")
 async def process(request, response, pg_connection, path_variables, authorizer):
 	role_id = path_variables['role']
 
@@ -24,21 +25,21 @@ async def process(request, response, pg_connection, path_variables, authorizer):
 			message_localizer = create_message_localizer(request)
 			message_localizer.assign_response_error(response, "ROLE_NOT_FOUND")
 			response.set_status(404)
-			return None
+			return
 
 		role_users = await pg_connection.fetch(retrieve_role_users, role_id)
 		role_funcs = await pg_connection.fetch(retrieve_role_accesses, role_id)
 
 		translated_role_funcs = list()
 		for functionality in role_funcs:
-			specs = dict(functionality)
-
 			package_code = functionality['package']
-			specs['package'] = authorizer.get_package_translation(package_code, request)
-			specs["name"] = authorizer.get_func_translation(package_code,
-				specs['name'], request)
 
-			translated_role_funcs.append(specs)
+			translated_role_funcs.append({
+				'id': functionality['id'],
+				'package': authorizer.get_package_translation(package_code, request),
+				'name': authorizer.get_func_translation(package_code,
+					functionality['name'], request)
+			})
 
 	return pavao.assemble_dicts(role_info,
 		functionalities=translated_role_funcs,
