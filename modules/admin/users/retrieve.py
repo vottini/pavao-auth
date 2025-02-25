@@ -33,7 +33,7 @@ async def process(request, pg_connection, path_variables):
 	collected_roles = list()
 
 	for role in roles:
-		if role['admin']:
+		if role['code'] == "PAVAO::ADMIN_ROLE":
 			admin = True
 			continue
 

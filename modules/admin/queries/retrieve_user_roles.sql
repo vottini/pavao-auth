@@ -1,8 +1,8 @@
 
 SELECT
 	rl.id,
-	rl.name,
-	rl.admin
+	rl.code,
+	rl.name
 
 FROM pavao.account acc
 	INNER JOIN pavao.assignment assig ON assig.account = acc.id

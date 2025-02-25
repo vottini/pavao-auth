@@ -1,6 +1,5 @@
 
 import re
-import os
 import asyncio
 import pavao
 
@@ -17,7 +16,12 @@ list_disabled_functionalities = pavao.include("./queries/list_disabled_functiona
 enable_functionality = pavao.include("./queries/enable_functionality.sql")
 retrieve_functionality = pavao.include("./queries/retrieve_functionality.sql")
 
-pavao.import_module('token')
+assert_role_exists = pavao.include("./queries/assert_role_exists.sql")
+search_functionality = pavao.include("queries/search_functionality.sql")
+insert_functionality = pavao.include("queries/insert_functionality.sql")
+retrieve_role_id = pavao.include("queries/retrieve_role_id.sql")
+insert_role_access = pavao.include("queries/insert_role_access.sql")
+
 _bearer_pattern = re.compile(r"^Bearer (\S+)$")
 
 class AuthError:
@@ -46,38 +50,35 @@ def get_identity(entity):
 def parse_roles(token_claims):
 	token_roles = token_claims['roles'].split(',')
 	str_roles = filter(lambda x : len(x) > 0, token_roles)
-	return (int(role) for role in str_roles)
+	return (int(role_id) for role_id in str_roles)
 
 #-------------------------------------------------------------------------------
 
-queries_dir = pavao.path_to("database")
-db_creation = [arq for arq in os.listdir(queries_dir) if arq.endswith('.sql')]
-db_creation.sort()
-
-
 class Authorizer:
-	def __init__(self):
+	def __init__(self, jwt_manager):
+		self.jwt_manager = jwt_manager
+
 		self.roles_access = dict()
 		self.functionalities = dict()
 		self.packages = dict()
-
 		self.disabled = set()
 		self.users_modification = dict()
 		self.blacklisted = dict()
 
 
 	async def setup(self, pg_connection):
-		for query in db_creation:
-			with open(os.path.join(queries_dir, query)) as fd:
-				await pg_connection.execute(fd.read())
-
-		self.disabled = set(await pg_connection.fetch(list_disabled_functionalities))
+		# after each update
+		roles_access = dict()
+		disabled = set(await pg_connection.fetch(list_disabled_functionalities))
 		accesses = await pg_connection.fetch(list_roles_accesses)
 
 		for role_id, package, functionality in accesses:
 			func_set = self.roles_access.get(role_id, set())
 			func_set.add((package, functionality))
-			self.roles_access[role_id] = func_set
+			roles_access[role_id] = func_set
+
+		self.disabled = disabled
+		self.roles_access = roles_access
 
 	#--------------------------------------------------------------------------
 
@@ -148,26 +149,26 @@ class Authorizer:
 
 	#--------------------------------------------------------------------------
 
-	async def allow_access(self, pg_connection, functionality_id, role):
+	async def allow_access(self, pg_connection, functionality_id, role_id):
 		func_info = await pg_connection.fetchrow(
 			retrieve_functionality,
 			functionality_id)
 
 		if func_info is not None:
 			package, functionality = func_info
-			func_set = self.roles_access.get(role, set())
+			func_set = self.roles_access.get(role_id, set())
 			func_set.add((package, functionality))
-			self.roles_access[role] = func_set
+			self.roles_access[role_id] = func_set
 
 
-	async def remove_access(self, pg_connection, functionality_id, role):
+	async def remove_access(self, pg_connection, functionality_id, role_id):
 		func_info = await pg_connection.fetchrow(
 			retrieve_functionality,
 			functionality_id)
 
 		if func_info is not None:
 			package, functionality = func_info
-			func_set = self.roles_access.get(role, set())
+			func_set = self.roles_access.get(role_id, set())
 			func_set.discard((package, functionality))
 
 	#--------------------------------------------------------------------------
@@ -182,7 +183,7 @@ class Authorizer:
 			return False, AuthError.MISSING_TOKEN
 
 		sent_token = found_token.group(1)
-		if (token_claims := token.validate_token(sent_token)) is not None:
+		if (token_claims := self.jwt_manager.validate_token(sent_token)) is not None:
 			return True, token_claims
 
 		return False, AuthError.INVALID_TOKEN
@@ -213,8 +214,8 @@ class Authorizer:
 			return False, AuthError.BLOCKED_USER
 
 		if functionality is not None:
-			for role in parse_roles(token_claims):
-				accesses = self.roles_access.get(role)
+			for role_id in parse_roles(token_claims):
+				accesses = self.roles_access.get(role_id)
 				if accesses is not None and complete_functionality in accesses:
 					break
 
@@ -234,8 +235,8 @@ class Authorizer:
 
 		if validated:
 			token_claims = outcome
-			for role in parse_roles(token_claims):
-				accesses = self.roles_access.get(role)
+			for role_id in parse_roles(token_claims):
+				accesses = self.roles_access.get(role_id)
 				if accesses is not None:
 					result.update(accesses)
 
@@ -244,28 +245,60 @@ class Authorizer:
 	#------------------------------------------------------------
 
 	def get_package_translation(self, package, request):
-		accepted_languages = request.parse_locale_priority()
 		mapping = self.packages.get(package)
+		if not isinstance(mapping, LazyLocalizer):
+			return mapping
 
-		return (mapping.localize(accepted_languages)
-			if isinstance(mapping, LazyLocalizer)
-			else mapping)
+		accepted_languages = request.parse_locale_priority()
+		return mapping.localize(accepted_languages)
 
 
 	def get_func_translation(self, package, functionality, request):
-		accepted_languages = request.parse_locale_priority()
 		mapping = self.functionalities.get((package, functionality))
+		if not isinstance(mapping, LazyLocalizer):
+			return mapping
 
-		return (mapping.localize(accepted_languages)
-			if isinstance(mapping, LazyLocalizer)
-			else mapping)
+		accepted_languages = request.parse_locale_priority()
+		return mapping.localize(accepted_languages)
+
+	#-----------------------------------------------------------
+
+	async def assert_role_existence(self, pg_connection,
+		role_code, role_name, role_description=None):
+		return await pg_connection.fetchval(assert_role_exists,
+			role_code, role_name, role_description)
+
+
+	async def assert_role_access(self, pg_connection, pkg_spec, fnc_spec, role_code):
+		package_identity = get_identity(pkg_spec)
+		func_identity = get_identity(fnc_spec)
+
+		async with pg_connection.transaction():
+			func_id = await pg_connection.fetchval(search_functionality,
+				package_identity,
+				func_identity)
+
+			if func_id is None:
+				func_id = await pg_connection.fetchval(insert_functionality,
+					package_identity,
+					func_identity)
+
+			role_id = await pg_connection.fetchval(
+				retrieve_role_id,
+				role_code)
+	
+			if role_id is None: return
+			await pg_connection.execute(
+				insert_role_access, func_id,
+				role_id)
+			
+			await self.allow_access(
+				pg_connection, func_id,
+				role_id)
 
 	#-----------------------------------------------------------
 
 	def validate_token(self, token_str):
-		return token.validate_token(token_str)
+		return self.jwt_manager.validate_token(token_str)
 
-#------------------------------------------------------------
-
-instance = Authorizer()
 

@@ -19,12 +19,13 @@ async def setup(settings):
 		"pavao.token",
 		_token_schema)
 
+
 access_validity = 'access_minutes'
 refresh_validity = 'refresh_minutes'
 
-def create_claims(subject, issue_time, minutes_validity):
+def create_claims(subject, issue_time, validity):
 	validities = token_settings['validity']
-	expiration = issue_time + timedelta(minutes=validities[minutes_validity])
+	expiration = issue_time + timedelta(minutes=validities[validity])
 	issuer = token_settings['issuer']
 
 	return {

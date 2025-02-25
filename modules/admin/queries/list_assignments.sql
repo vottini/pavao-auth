@@ -9,5 +9,5 @@ SELECT
 			assign."role" = rl.id AND
 			assign.account = $1
 
-	WHERE NOT rl.admin;
+	WHERE rl.code <> 'PAVAO::ADMIN_ROLE';
 

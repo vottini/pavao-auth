@@ -3,16 +3,16 @@ WITH
 
 existing (id) AS (
 	SELECT id FROM pavao."role"
-	WHERE admin
+	WHERE code = $1
 ),
 
 created (id) AS (
 	INSERT INTO
-		pavao."role" (name, admin)
-		SELECT 'Admin', TRUE
+		pavao."role" (code, name, description)
+		SELECT $1, $2, $3
 			WHERE NOT EXISTS (
 				SELECT 1 FROM pavao."role"
-		  		WHERE admin
+		  		WHERE code = $1
 			)
 
 	RETURNING id

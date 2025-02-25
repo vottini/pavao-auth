@@ -64,7 +64,8 @@ object BasicUserInfo {
 
 object RoleCreation {
 	name: NonBlankString,
-	optional description: String
+	optional description: String,
+	optional code: String
 }
 
 object RoleUpdate {

@@ -1,4 +1,5 @@
 
+import re
 import asyncio
 import asyncpg
 import pavao
@@ -21,10 +22,14 @@ async def process(request, response, parsed_json, pg_connection):
 		if pavao.has_optional_field(parsed_json, 'description')
 		else None)
 
+	upper_name = parsed_json.name.upper()
+	saned_name = re.sub(r'[^A-Z ]', '', upper_name).replace(' ', '_')
+	code = f"USER::{saned_name}"
+
 	try:
 		roleId = await pg_connection.fetchval(add_role,
 			capitalize(parsed_json.name),
-			description)
+			description, code)
 
 	except asyncpg.UniqueViolationError as e:
 		response.set_status(409)

@@ -6,5 +6,5 @@ SELECT COUNT(*) FROM
 
 	WHERE
 		func.id = $1 AND
-		rl.admin;
+		rl.code = 'PAVAO::ADMIN_ROLE';
 

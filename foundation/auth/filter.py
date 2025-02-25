@@ -3,20 +3,21 @@ import asyncio
 import pavao
 
 pavao.import_module('common')
-pavao.import_module('authorizer')
+pavao.import_module('authorizer', with_name='auth')
 
 class AuthFilter(pavao.RequestFilter):
 	async def init(self, loaded_settings):
 		common.process_config(loaded_settings)
 
 
-	async def enabled(self, endpoint_specs, pg_connection):
-		if not common.enabled:
+	async def enabled(self, endpoint_specs, authorizer, pg_connection):
+		if not common.enabled: return False
+		if endpoint_specs.get('public') is True:
 			return False
 
-		if endpoint_specs.get('public') is True: return False
-		await authorizer.instance.register_functionality(
-			endpoint_specs, pg_connection)
+		await authorizer.register_functionality(
+			endpoint_specs,
+			pg_connection)
 
 		return True
 
@@ -26,13 +27,13 @@ class AuthFilter(pavao.RequestFilter):
 		if has_access: return True
 
 		if validation_outcome in (
-			authorizer.AuthError.MISSING_TOKEN,
-			authorizer.AuthError.INVALID_TOKEN,
-			authorizer.AuthError.EXPIRED_AUTH,
-			authorizer.AuthError.BLOCKED_USER
+			auth.AuthError.MISSING_TOKEN,
+			auth.AuthError.INVALID_TOKEN,
+			auth.AuthError.EXPIRED_AUTH,
+			auth.AuthError.BLOCKED_USER
 		): status = 401
 
-		if validation_outcome is authorizer.AuthError.NOT_ALLOWED: status = 403
-		if validation_outcome is authorizer.AuthError.DISABLED_ENDPOINT: status = 410
+		if validation_outcome is auth.AuthError.NOT_ALLOWED: status = 403
+		if validation_outcome is auth.AuthError.DISABLED_ENDPOINT: status = 410
 		response.set_status(status)
 		return False

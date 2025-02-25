@@ -1,11 +1,10 @@
 
-import pavao
-
 auth_schema = {
 	"enabled": False
 }
 
 enabled = False
+
 def process_config(loaded_settings):
 	global enabled
 	if enabled:

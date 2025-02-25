@@ -21,7 +21,6 @@ class AdminSpecs:
 get_login_count = pavao.include("queries/get_login_count.sql")
 insert_user = pavao.include("queries/insert_user.sql")
 insert_authentication = pavao.include("queries/insert_authentication.sql")
-assert_admin_role = pavao.include("queries/assert_admin_role.sql")
 assign_admin = pavao.include("queries/assign_admin.sql")
 
 
@@ -52,7 +51,6 @@ async def execute(db_settings, admin_specs):
 			await db_connection.execute(insert_authentication,
 				account, passwordHash, admin_specs.change_pw)
 
-			await db_connection.execute(assert_admin_role)
 			await db_connection.execute(assign_admin, account)
 			print("Success!")
 
