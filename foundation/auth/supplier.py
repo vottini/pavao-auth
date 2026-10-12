@@ -5,6 +5,7 @@ import pavao
 
 pavao.import_module('authorizer')
 pavao.import_module('common')
+pavao.import_module('jwt')
 
 queries_dir = pavao.path_to("database")
 db_creation = [arq for arq in os.listdir(queries_dir) if arq.endswith('.sql')]
@@ -20,7 +21,7 @@ async def select_data(access_validation):
 class AuthSupplier(pavao.ParameterSupplier):
 
 	def __init__(self):
-		self.token = pavao.JwtSupplier()
+		self.token = jwt.JwtSupplier()
 		self.authorizer = authorizer.Authorizer(self.token)
 
 
