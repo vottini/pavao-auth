@@ -1,9 +1,66 @@
 
 import asyncio
 import argparse
+import readline
+import asyncpg
+from dataclasses import dataclass
+from getpass import getpass
+from argon2 import PasswordHasher
 import pavao
 
-pavao.import_module("create_admin")
+get_login_count = pavao.include("queries/get_login_count.sql")
+insert_user = pavao.include("queries/insert_user.sql")
+insert_authentication = pavao.include("queries/insert_authentication.sql")
+assign_admin = pavao.include("queries/assign_admin.sql")
+
+#-------------------------------------------------------------------------------
+
+@dataclass
+class AdminSpecs:
+	first_name: str
+	last_name: str
+	login: str
+	password: str
+	change_pw: bool
+
+
+async def execute(db_settings, admin_specs):
+
+	try:
+		db_pool = await asyncpg.create_pool(**db_settings)
+		async with db_pool.acquire() as db_connection:
+			login_count = await db_connection.fetchval(
+				get_login_count, admin_specs.login)
+
+			if login_count > 0:
+				print(f"Login '{admin_specs.login}' already exists, aborting...")
+				return
+
+	except Exception as e:
+		print("Unable to query existing logins: ", e)
+		await db_pool.close()
+		return
+
+	try:
+		async with db_pool.acquire() as db_connection:
+			account = await db_connection.fetchval(insert_user, admin_specs.login,
+				admin_specs.first_name,
+				admin_specs.last_name)
+
+			passwordHash = PasswordHasher().hash(admin_specs.password)
+			await db_connection.execute(insert_authentication,
+				account, passwordHash, admin_specs.change_pw)
+
+			await db_connection.execute(assign_admin, account)
+			print("Success!")
+
+	except Exception as e:
+		print("Unable to add login: ", e)
+
+	finally:
+		await db_pool.close()
+
+#-------------------------------------------------------------------------------
 
 cli_parser = argparse.ArgumentParser(
 	prog="python -m pavao",
@@ -41,9 +98,6 @@ db_settings = settings.get_setting(
 	database_schema)
 
 #-------------------------------------------------------------------------------
-
-import readline
-from getpass import getpass
 
 def split(name):
 	splitted = name.split(' ')
@@ -104,7 +158,7 @@ if args.create_admin:
 			CHANGE_PASSWORD_ON_LOGIN,
 			DEFAULT_CHANGE_PW)
 
-	specs = create_admin.AdminSpecs(first_name,
+	specs = AdminSpecs(first_name,
 		last_name if len(last_name) > 0 else None,
 		login, password1, change_pw == "Y")
 
@@ -130,7 +184,7 @@ if (import_file := args.import_admin) is not None:
 	admin_settings = loaded_settings.get_setting("admin",
 		user_schema)
 
-	specs = create_admin.AdminSpecs(
+	specs = AdminSpecs(
 		sane_name(admin_settings["first_name"]),
 		nullable(sane_name(admin_settings["last_name"])),
 		admin_settings["login"].lower(),
@@ -140,5 +194,4 @@ if (import_file := args.import_admin) is not None:
 
 #-------------------------------------------------------------------------------
 
-asyncio.run(create_admin.execute(db_settings, specs))
-
+asyncio.run(execute(db_settings, specs))

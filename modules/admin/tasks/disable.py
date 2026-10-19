@@ -7,19 +7,12 @@ import pavao
 	.import_item('create_message_localizer')
 	.import_item('localizer'))
 
-enable_task = pavao.include("../queries/enable_task.sql")
-
-async def process(request, response, path_variables, internal_db, server, broadcasting):
+async def process(request, response, path_variables, task_store, server, broadcasting):
 	task_data = server.scheduler.get_task(path_variables['task'])
 
 	if task_data is not None:
 		await task_data.disable(broadcasting)
-		async with internal_db.cursor() as cursor:
-			await cursor.execute(enable_task, {
-				'task_id': task_data.ident,
-				'enabled': False })
-
-		await internal_db.commit()
+		await task_store.set_task_enabled(task_data.ident, False)
 
 	else:
 		message_localizer = create_message_localizer(request)

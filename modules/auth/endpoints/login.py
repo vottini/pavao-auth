@@ -22,7 +22,7 @@ internationalization = pavao.Internationalization(
 
 #-------------------------------------------------------------------------------
 
-@pavao.generates_json(file_blueprint=blueprints, with_root="TokenInfo")
+@pavao.generates_json(file_blueprint=blueprints, with_root="LoginInfo")
 @pavao.accepts_json(file_blueprint=blueprints, with_root="Credentials")
 async def process(request, response, pg_connection, token_methods, parsed_json):
 	localizer = internationalization.create_localizer(
@@ -84,9 +84,10 @@ async def process(request, response, pg_connection, token_methods, parsed_json):
 		access_token = token_methods.generate_token(access_claims)
 
 		return {
-			"token": access_token,
-			"changePassword": True,
-			"expires": access_claims['exp']
+			"access_token": access_token,
+			"token_type": "Bearer",
+			"expires_in": access_claims['exp'] - int(now.timestamp()),
+			"change_password": True,
 		}
 
 	roles = await pg_connection.fetch(
@@ -121,9 +122,10 @@ async def process(request, response, pg_connection, token_methods, parsed_json):
 	)
 
 	return {
-		"token": access_token,
-		"changePassword": False,
-		"expires": access_claims['exp']
+		"access_token": access_token,
+		"token_type": "Bearer",
+		"expires_in": access_claims['exp'] - int(now.timestamp()),
+		"change_password": False,
 	}
 
 #-------------------------------------------------------------------------------

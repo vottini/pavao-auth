@@ -31,10 +31,10 @@ Users
        "password": "S3cr3tPass",
        "firstName": "John",
        "lastName": "Doe",
-       "changePassword": true
+       "change_password": true
      }
 
-  Returns the new user's integer ID with status 201. Setting ``changePassword: true``
+  Returns the new user's integer ID with status 201. Setting ``change_password: true``
   forces a password reset on first login (see :doc:`authentication`). First and last name
   are stored in title case. **409** if the login is already taken.
 
@@ -80,9 +80,9 @@ Users
 
   .. code-block:: json
 
-     { "password": "N3wPass99", "changePassword": false }
+     { "password": "N3wPass99", "change_password": false }
 
-  ``changePassword`` is optional and updates the reset flag when provided.
+  ``change_password`` is optional and updates the reset flag when provided.
   **404** if user not found.
 
 User activation

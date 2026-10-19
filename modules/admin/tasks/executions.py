@@ -10,25 +10,7 @@ import pavao
 	.import_item('localizer'))
 
 day_pattern = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
-list_task_executions = pavao.include("../queries/list_task_executions.sql")
-retrieve_task_output = pavao.include("../queries/retrieve_task_output.sql")
 blueprints = pavao.path_to("../blueprints.jbp")
-
-#-------------------------------------------------------------------------------
-
-def map_execution(row):
-	return {
-		'id': row[0],
-		'success': row[1],
-		'start': row[2],
-		'finish': row[3]
-	}
-
-def map_output(row):
-	return {
-		'instant': row[0],
-		'content': row[1]
-	}
 
 #-------------------------------------------------------------------------------
 
@@ -38,7 +20,7 @@ def map_output(row):
 	array_root=True)
 
 @pavao.accepts_parameters({'day': str})
-async def process(request, response, parameters, internal_db, path_variables):
+async def process(request, response, parameters, task_store, path_variables):
 	day = parameters['day']
 
 	if day_pattern.match(day) is None:
@@ -48,27 +30,13 @@ async def process(request, response, parameters, internal_db, path_variables):
 			"INVALID_DAY"
 		)
 
-	async with internal_db.execute(
-		list_task_executions, {
-			'task': path_variables['task'],
-			'start': day
-		}) as cursor:
-
-		found = [ map_execution(row)
-			for row in await cursor.fetchall()
-		]
+	parsed_day = datetime.date.fromisoformat(day)
+	found = await task_store.get_executions(path_variables['task'], parsed_day)
 
 	outputs = dict()
 	for execution in found:
 		ident = execution['id']
-
-		async with internal_db.execute(
-			retrieve_task_output,
-			[ident]) as cursor:
-
-			outputs[ident] = [ map_output(row)
-				for row in await cursor.fetchall()
-			]
+		outputs[ident] = await task_store.get_outputs(ident)
 
 	return [
 		pavao.assemble_dicts(execution, outputs=[

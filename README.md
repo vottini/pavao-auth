@@ -29,7 +29,7 @@ JWT-based authentication and role/permission management extension for
 |---|---|---|
 | `POST` | `/login` | [login.py](modules/auth/endpoints/login.py) |
 | `DELETE` | `/logout` | [logout.py](modules/auth/endpoints/logout.py) |
-| `GET` | `/refresh-token` | [refresh_token.py](modules/auth/endpoints/refresh_token.py) |
+| `POST` | `/refresh-token` | [refresh_token.py](modules/auth/endpoints/refresh_token.py) |
 | `POST` | `/change-password` | [change_password.py](modules/auth/endpoints/change_password.py) |
 | `GET` | `/self` | [self.py](modules/auth/endpoints/self.py) |
 
@@ -160,6 +160,7 @@ async def process(token_methods):
 - [Authentication & Authorization](docs/authentication.rst) — setup, auth flows, protecting endpoints, token invalidation, scheduled tasks
 - [Administration API](docs/admin.rst) — users, roles, functionalities, task management endpoints
 - [JWT](docs/jwt.rst) — token generation, validation, and key rotation
+- [create-admin tool](docs/create_admin.rst) — bootstrapping the first administrator account
 
 ## License
 

@@ -14,7 +14,7 @@ object UserCreation {
 	password: SanePassword,
 	firstName: NonBlankString,
 	optional lastName: NonBlankString,
-	changePassword: Bool
+	change_password: Bool
 }
 
 object UserUpdate {
@@ -25,7 +25,7 @@ object UserUpdate {
 
 object PasswordUpdate {
 	password: SanePassword,
-	optional changePassword: Bool
+	optional change_password: Bool
 }
 
 object CoreUserInfo {

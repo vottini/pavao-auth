@@ -103,9 +103,10 @@ async def process(request, response, pg_connection, token_methods):
 	)
 
 	return {
-		"token": access_token,
-		"changePassword": False,
-		"expires": access_claims['exp']
+		"access_token": access_token,
+		"token_type": "Bearer",
+		"expires_in": access_claims['exp'] - int(now.timestamp()),
+		"change_password": False,
 	}
 
 #-------------------------------------------------------------------------------
@@ -113,7 +114,7 @@ async def process(request, response, pg_connection, token_methods):
 def pavao_endpoint():
 
 	return {
-		'method': 'GET',
+		'method': 'POST',
 		'path': '/refresh-token',
 		'processor': process,
 		'public': True
