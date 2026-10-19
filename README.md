@@ -11,9 +11,6 @@ JWT-based authentication and role/permission management extension for
 | Name | Type | Description |
 |---|---|---|
 | `auth_data` | `AuthData` | Decoded token claims for the current request: `account_id`, `token`, `expiration`. `None` if the request is unauthenticated. |
-| `access_validation` | `tuple` | Raw `(has_access, outcome)` pair. `outcome` is an `AuthData` on success or an `AuthError` constant on failure. |
-| `authorizer` | `Authorizer` | In-memory access control engine. Useful for modules that need to check or modify permissions at runtime. |
-| `token_methods` | `JwtSupplier` | JWT generation and validation. Useful for modules that issue tokens (login, refresh). |
 
 **Filter**
 

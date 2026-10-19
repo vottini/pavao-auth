@@ -36,7 +36,7 @@ class AuthError:
 @dataclass
 class AuthData:
 	account_id: str
-	token: str
+	jti: str
 	expiration: int
 
 #-------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ class Authorizer:
 
 
 	def blacklist(self, auth_data):
-		key = (auth_data.account_id, auth_data.token)
+		key = (auth_data.account_id, auth_data.jti)
 		self.blacklisted[key] = auth_data.expiration
 
 

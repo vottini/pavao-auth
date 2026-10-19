@@ -75,22 +75,13 @@ The supplier exposes four named parameters to any endpoint or task that declares
      - Description
    * - ``auth_data``
      - ``AuthData | None``
-     - Decoded token claims for the current request: ``account_id``, ``token`` (JTI),
-       and ``expiration``. ``None`` when the filter is disabled or the endpoint is public.
-   * - ``access_validation``
-     - ``(bool, AuthData | AuthError)``
-     - Raw result of token validation before the filter interprets it. The first element
-       is ``True`` on success. On failure the second element is one of the ``AuthError``
-       constants. Useful in endpoints that need to inspect the failure reason directly.
-   * - ``authorizer``
-     - ``Authorizer``
-     - In-memory access control engine. Exposes runtime permission management:
-       blacklisting tokens, marking users as modified, enabling/disabling functionalities,
-       and granting/revoking role access.
-   * - ``token_methods``
-     - ``JwtSupplier``
-     - JWT generation and validation. Used by login and refresh endpoints to issue tokens.
-       See :doc:`jwt` for the full API.
+     - Decoded token claims for the authenticated request. ``None`` when the endpoint
+       is public. Fields:
+
+       - ``account_id`` (``str``) — the account identifier from the ``sub`` claim.
+       - ``jti`` (``str``) — the token's unique identifier, useful for
+         blacklisting on logout or marking a session as modified.
+       - ``expiration`` (``int``) — token expiry as a Unix timestamp.
 
 Authentication flow
 ===================

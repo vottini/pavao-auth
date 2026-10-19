@@ -10,7 +10,7 @@ async def process(authorizer, response, pg_connection, auth_data):
 	await pg_connection.execute(
 		delete_refresh,
 		auth_data.account_id,
-		auth_data.token)
+		auth_data.jti)
 
 	response.add_cookie(
 		pavao.http.Cookie('token')
