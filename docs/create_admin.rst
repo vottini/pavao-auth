@@ -3,11 +3,9 @@ create-admin tool
 *****************
 
 The ``create-admin`` tool bootstraps the first administrator account, or adds
-additional ones at any time. It connects directly to the database using the
-same ``application.yml`` the server uses, so no running server is required.
-
-**Precondition:** the server must have been started at least once with
-pavao-auth loaded and enabled, so that the required schema is in place. Running the tool against an uninitialised database will fail.
+additional ones at any time. It connects directly to the database, so the
+server does not need to be running — though it must have been started at least
+once with pavao-auth loaded and enabled so that the required schema is in place.
 
 The tool is installed under ``tools/auth/`` by ``pavao-pkg`` and is invoked
 with Python directly:
