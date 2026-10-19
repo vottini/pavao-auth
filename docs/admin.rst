@@ -28,7 +28,7 @@ Users
 
      {
        "login": "john.doe",
-       "password": "S3cr3tPass",
+       "password": "hunter12",
        "firstName": "John",
        "lastName": "Doe",
        "change_password": true
@@ -45,9 +45,12 @@ Users
 
      [
        {
-         "id": 1, "login": "john.doe",
-         "firstName": "John", "lastName": "Doe",
-         "active": true, "admin": false
+         "id": 1,
+         "login": "john.doe",
+         "firstName": "John",
+         "lastName": "Doe",
+         "active": true,
+         "admin": false
        }
      ]
 
@@ -57,10 +60,15 @@ Users
   .. code-block:: json
 
      {
-       "id": 1, "login": "john.doe",
-       "firstName": "John", "lastName": "Doe",
-       "active": true, "admin": false,
-       "roles": [{ "id": 3, "name": "Analyst" }]
+       "id": 1,
+       "login": "john.doe",
+       "firstName": "John",
+       "lastName": "Doe",
+       "active": true,
+       "admin": false,
+       "roles": [
+         { "id": 3, "name": "Analyst" }
+       ]
      }
 
   The admin role is filtered from the ``roles`` array and reflected in the ``admin``
@@ -71,7 +79,10 @@ Users
 
   .. code-block:: json
 
-     { "login": "john.doe2", "firstName": "Jonathan" }
+     {
+       "login": "john.doe2",
+       "firstName": "Jonathan"
+     }
 
   **404** if user not found. **409** if the new login is already taken.
 
@@ -80,7 +91,10 @@ Users
 
   .. code-block:: json
 
-     { "password": "N3wPass99", "change_password": false }
+     {
+       "password": "hunter13",
+       "change_password": false
+     }
 
   ``change_password`` is optional and updates the reset flag when provided.
   **404** if user not found.
@@ -125,8 +139,10 @@ Role assignments
   .. code-block:: json
 
      {
-       "id": 1, "login": "john.doe",
-       "firstName": "John", "lastName": "Doe",
+       "id": 1,
+       "login": "john.doe",
+       "firstName": "John",
+       "lastName": "Doe",
        "active": true,
        "assignments": [
          { "id": 2, "name": "Analyst", "assigned": true },
@@ -155,7 +171,11 @@ Roles
 
   .. code-block:: json
 
-     { "name": "Analyst", "description": "Read-only analytics access", "code": "USER::ANALYST" }
+     {
+       "name": "Analyst",
+       "description": "Read-only analytics access",
+       "code": "USER::ANALYST"
+     }
 
   ``description`` and ``code`` are optional. If ``code`` is omitted it is generated from
   the name: uppercased, non-letter characters removed, spaces replaced with underscores,
@@ -167,7 +187,13 @@ Roles
 
   .. code-block:: json
 
-     [{ "id": 2, "name": "Analyst", "description": "Read-only analytics access" }]
+     [
+       {
+         "id": 2,
+         "name": "Analyst",
+         "description": "Read-only analytics access"
+       }
+     ]
 
 ``GET /admin/roles/{role:int}``
   Retrieve a single role with its assigned functionalities and users.
@@ -175,7 +201,9 @@ Roles
   .. code-block:: json
 
      {
-       "id": 2, "name": "Analyst", "description": null,
+       "id": 2,
+       "name": "Analyst",
+       "description": null,
        "functionalities": [
          { "id": 5, "package": "Reporting", "name": "View summary" }
        ],
@@ -211,9 +239,14 @@ Role access
   .. code-block:: json
 
      {
-       "id": 2, "name": "Analyst",
-       "accessable": [{ "id": 5, "package": "Reporting", "name": "View summary" }],
-       "forbidden": [{ "id": 6, "package": "Reporting", "name": "Export data" }]
+       "id": 2,
+       "name": "Analyst",
+       "accessable": [
+         { "id": 5, "package": "Reporting", "name": "View summary" }
+       ],
+       "forbidden": [
+         { "id": 6, "package": "Reporting", "name": "Export data" }
+       ]
      }
 
 ``PUT /admin/roles/{role:int}/access/{functionality:int}``
@@ -242,7 +275,11 @@ created manually.
        {
          "package": "Reporting",
          "functionalities": [
-           { "id": 5, "functionality": "View summary", "enabled": true }
+           {
+             "id": 5,
+             "functionality": "View summary",
+             "enabled": true
+           }
          ]
        }
      ]
@@ -253,7 +290,11 @@ created manually.
   .. code-block:: json
 
      [
-       { "package": "Reporting", "functionality": "View summary", "allowingRole": "Analyst" }
+       {
+         "package": "Reporting",
+         "functionality": "View summary",
+         "allowingRole": "Analyst"
+       }
      ]
 
 ``PUT /admin/functionalities/{functionality:int}/enable``
@@ -280,7 +321,11 @@ background jobs defined across all loaded modules — including third-party exte
        {
          "package": "Pavão",
          "tasks": [
-           { "id": 1, "name": "Refresh secret key", "enabled": true }
+           {
+             "id": 1,
+             "name": "Refresh secret key",
+             "enabled": true
+           }
          ]
        }
      ]
@@ -314,7 +359,9 @@ background jobs defined across all loaded modules — including third-party exte
 
   .. code-block:: json
 
-     { "nextExecution": 1729382400 }
+     {
+       "nextExecution": 1729382400
+     }
 
   **404** if not found.
 
@@ -338,7 +385,10 @@ background jobs defined across all loaded modules — including third-party exte
          "start": 1729296000,
          "finish": 1729296005,
          "outputs": [
-           { "instant": 1729296001, "content": "1 refresh token(s) purged" }
+           {
+             "instant": 1729296001,
+             "content": "1 refresh token(s) purged"
+           }
          ]
        }
      ]

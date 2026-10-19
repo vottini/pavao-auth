@@ -66,7 +66,7 @@ The file must contain an ``admin`` section:
      first_name: Clara
      last_name: Venturini
      login: clara.venturini
-     password: S3cr3tPass
+     password: hunter12
      change_password: false
 
 ``last_name`` and ``change_password`` are optional (default: empty and

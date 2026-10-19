@@ -54,7 +54,7 @@ To create the initial administrator account run the setup tool (or insert a row 
      first_name: Clara
      last_name: Venturini
      login: clara.venturini
-     password: Trento12
+     password: hunter12
      change_password: true
 
 The password is hashed with Argon2 before storage; the plaintext is never persisted.
@@ -93,7 +93,10 @@ Login
 
 .. code-block:: json
 
-   { "login": "clara.venturini", "password": "Trento12" }
+   {
+     "login": "clara.venturini",
+     "password": "hunter12"
+   }
 
 The endpoint verifies the password with Argon2, checks that the account is active, and
 issues an access token and a refresh token.
@@ -106,7 +109,12 @@ client should redirect the user to the password change screen before continuing.
 
 .. code-block:: json
 
-   { "access_token": "<access_jwt>", "token_type": "Bearer", "expires_in": 600, "change_password": false }
+   {
+     "access_token": "<access_jwt>",
+     "token_type": "Bearer",
+     "expires_in": 600,
+     "change_password": false
+   }
 
 The refresh token is returned as an ``HttpOnly``, ``SameSite=Strict`` cookie scoped to
 ``/refresh-token``, and is never exposed in the response body.
@@ -144,7 +152,11 @@ and the new one is inserted. Replaying a used refresh token therefore fails.
 
 .. code-block:: json
 
-   { "access_token": "<new_access_jwt>", "token_type": "Bearer", "expires_in": 600 }
+   {
+     "access_token": "<new_access_jwt>",
+     "token_type": "Bearer",
+     "expires_in": 600
+   }
 
 **Errors:** 400 — missing cookie, invalid token, expired token, or disabled account.
 
@@ -170,7 +182,10 @@ Password change
 
 .. code-block:: json
 
-   { "oldPassword": "Trento12", "newPassword": "Trento99" }
+   {
+     "oldPassword": "hunter12",
+     "newPassword": "hunter13"
+   }
 
 Verifies the old password, updates the Argon2 hash, and calls
 ``authorizer.mark_modified(account_id)``. This records the current timestamp against the
@@ -197,7 +212,10 @@ access to, translated to the locale indicated by the ``Accept-Language`` header.
      "lastName": "Venturini",
      "administrator": true,
      "accesses": [
-       { "package": "Administration", "functionality": "List users" }
+       {
+         "package": "Administration",
+         "functionality": "List users"
+       }
      ]
    }
 
