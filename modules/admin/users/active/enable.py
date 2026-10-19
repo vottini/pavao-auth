@@ -19,6 +19,8 @@ async def process(request, response, pg_connection, path_variables):
 		response.set_status(404)
 		message_localizer.assign_response_error(response,
 			"USER_NOT_FOUND")
+	else:
+		response.set_status(204)
 
 
 @assert_admin_access
@@ -28,7 +30,7 @@ def pavao_endpoint():
 		'method': 'PUT',
 		'path': '/admin/users/{user:int}/active',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("EDIT_USERS"),
+		'functionality': localizer.map("MANAGE_USERS"),
 		'processor': process
 	}
 

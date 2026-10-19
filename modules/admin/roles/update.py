@@ -46,7 +46,7 @@ def pavao_endpoint():
 		'method': 'PATCH',
 		'path': '/admin/roles/{role:int}',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("CREATE_ROLES"),
+		'functionality': localizer.map("MANAGE_ROLES"),
 		'processor': process
 	}
 

@@ -48,7 +48,7 @@ def pavao_endpoint():
 		'method': 'POST',
 		'path': '/admin/roles',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("CREATE_ROLES"),
+		'functionality': localizer.map("MANAGE_ROLES"),
 		'processor': process
 	}
 

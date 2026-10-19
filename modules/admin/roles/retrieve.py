@@ -53,7 +53,7 @@ def pavao_endpoint():
 		'method': 'GET',
 		'path': '/admin/roles/{role:int}',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("VIEW_ROLE"),
+		'functionality': localizer.map("MANAGE_ROLES"),
 		'processor': process
 	}
 

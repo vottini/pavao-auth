@@ -32,8 +32,8 @@ class AuthFilter(pavao.RequestFilter):
 			auth.AuthError.EXPIRED_AUTH,
 			auth.AuthError.BLOCKED_USER
 		): status = 401
-
-		if validation_outcome is auth.AuthError.NOT_ALLOWED: status = 403
-		if validation_outcome is auth.AuthError.DISABLED_ENDPOINT: status = 410
+		elif validation_outcome is auth.AuthError.NOT_ALLOWED: status = 403
+		elif validation_outcome is auth.AuthError.DISABLED_ENDPOINT: status = 410
+		else: status = 500
 		response.set_status(status)
 		return False

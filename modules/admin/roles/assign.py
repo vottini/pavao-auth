@@ -29,7 +29,7 @@ async def process(request, response, parsed_json, path_variables, pg_connection)
 
 	except asyncpg.ForeignKeyViolationError:
 		message_localizer = create_message_localizer(request)
-		localizer.assign_response_error(response, "ROLE_NOT_FOUND")
+		message_localizer.assign_response_error(response, "ROLE_NOT_FOUND")
 		response.set_status(404)
 
 
@@ -40,7 +40,7 @@ def pavao_endpoint():
 		'method': 'PUT',
 		'path': '/admin/roles/{role:int}/assignments',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("SET_ASSIGNMENTS"),
+		'functionality': localizer.map("MANAGE_ASSIGNMENTS"),
 		'processor': process
 	}
 

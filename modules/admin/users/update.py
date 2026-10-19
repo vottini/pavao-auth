@@ -42,7 +42,7 @@ def pavao_endpoint():
 		'method': 'PATCH',
 		'path': '/admin/users/{userId:int}',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("EDIT_USERS"),
+		'functionality': localizer.map("MANAGE_USERS"),
 		'processor': process
 	}
 

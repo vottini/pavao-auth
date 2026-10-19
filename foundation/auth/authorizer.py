@@ -17,10 +17,10 @@ enable_functionality = pavao.include("./queries/enable_functionality.sql")
 retrieve_functionality = pavao.include("./queries/retrieve_functionality.sql")
 
 assert_role_exists = pavao.include("./queries/assert_role_exists.sql")
-search_functionality = pavao.include("queries/search_functionality.sql")
-insert_functionality = pavao.include("queries/insert_functionality.sql")
-retrieve_role_id = pavao.include("queries/retrieve_role_id.sql")
-insert_role_access = pavao.include("queries/insert_role_access.sql")
+search_functionality = pavao.include("./queries/search_functionality.sql")
+insert_functionality = pavao.include("./queries/insert_functionality.sql")
+retrieve_role_id = pavao.include("./queries/retrieve_role_id.sql")
+insert_role_access = pavao.include("./queries/insert_role_access.sql")
 
 _bearer_pattern = re.compile(r"^Bearer (\S+)$")
 
@@ -114,8 +114,8 @@ class Authorizer:
 		now = int(datetime.now(timezone.utc).timestamp())
 		filtered = dict()
 
-		for key, expiration in self.blacklisted:
-			if expiration < now:
+		for key, expiration in self.blacklisted.items():
+			if expiration > now:
 				filtered[key] = expiration
 
 		removed = len(self.blacklisted) - len(filtered)

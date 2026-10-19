@@ -18,7 +18,7 @@ internationalization = pavao.Internationalization(
 #-------------------------------------------------------------------------------
 
 @pavao.accepts_json(file_blueprint=blueprints, with_root="PasswordUpdate")
-async def process(request, response, pg_connection, auth_data, parsed_json):
+async def process(request, response, pg_connection, auth_data, authorizer, parsed_json):
 	localizer = internationalization.create_localizer(
 		request.parse_locale_priority())
 
@@ -40,6 +40,8 @@ async def process(request, response, pg_connection, auth_data, parsed_json):
 		hashed_password = hasher.hash(parsed_json.new_password)
 		await pg_connection.execute(update_password_hash, hashed_password,
 			auth_data.account_id)
+
+		authorizer.mark_modified(auth_data.account_id)
 
 	except argon2.exceptions.VerifyMismatchError:
 		await asyncio.sleep(3)

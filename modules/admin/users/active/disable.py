@@ -18,10 +18,10 @@ async def process(request, response, pg_connection, path_variables, auth_data):
 		response.set_status(403)
 		return
 
-	disabled = await pg_connection.execute(
+	disabled = await pg_connection.fetchval(
 		enable_user, target_user, False)
 
-	if len(disabled) == 0:
+	if disabled is None:
 		response.set_status(404)
 		message_localizer.assign_response_error(response,
 			"USER_NOT_FOUND")
@@ -37,7 +37,7 @@ def pavao_endpoint():
 		'method': 'DELETE',
 		'path': '/admin/users/{user:int}/active',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("EDIT_USERS"),
+		'functionality': localizer.map("MANAGE_USERS"),
 		'processor': process
 	}
 

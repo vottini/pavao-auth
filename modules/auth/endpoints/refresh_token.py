@@ -85,7 +85,7 @@ async def process(request, response, pg_connection, token_methods):
 		credentials.refresh_validity)
 
 	refresh_hash = hashlib.md5(refresh_claims['jti'].encode()).digest().hex()
-	refresh_expiry = datetime.utcfromtimestamp(refresh_claims['exp'])
+	refresh_expiry = datetime.fromtimestamp(refresh_claims['exp'], tz=timezone.utc)
 
 	async with pg_connection.transaction():
 		await pg_connection.execute(remove_refresh, found_refresh['id'])

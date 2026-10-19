@@ -30,7 +30,7 @@ def pavao_endpoint():
 		'method': 'DELETE',
 		'path': '/admin/roles/{roleId:int}',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("CREATE_ROLES"),
+		'functionality': localizer.map("MANAGE_ROLES"),
 		'processor': process
 	}
 

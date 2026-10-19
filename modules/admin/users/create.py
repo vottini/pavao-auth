@@ -37,9 +37,7 @@ async def process(request, response, pg_connection, parsed_json):
 
 	except asyncpg.UniqueViolationError as e:
 		response.set_status(409)
-		return message_localizer.create_message(
-			"LOGIN_EXISTS"
-		)
+		return message_localizer.create_error("LOGIN_EXISTS")
 
 	response.set_status(201)
 	return userId
@@ -52,7 +50,7 @@ def pavao_endpoint():
 		'method': 'POST',
 		'path': '/admin/users',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("CREATE_USERS"),
+		'functionality': localizer.map("MANAGE_USERS"),
 		'processor': process
 	}
 

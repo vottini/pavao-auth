@@ -33,7 +33,7 @@ def pavao_endpoint():
 		'method': 'GET',
 		'path': '/admin/check-login',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("CHECK_LOGIN"),
+		'functionality': localizer.map("MANAGE_USERS"),
 		'processor': process
 	}
 

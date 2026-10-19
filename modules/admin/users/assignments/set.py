@@ -43,7 +43,7 @@ def pavao_endpoint():
 		'method': 'PUT',
 		'path': '/admin/users/{user:int}/assignments',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("SET_ASSIGNMENTS"),
+		'functionality': localizer.map("MANAGE_ASSIGNMENTS"),
 		'processor': process
 	}
 

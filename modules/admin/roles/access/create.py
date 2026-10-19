@@ -42,7 +42,7 @@ def pavao_endpoint():
 		'method': 'PUT',
 		'path': '/admin/roles/{role:int}/access/{functionality:int}',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("SET_ACCESSES"),
+		'functionality': localizer.map("MANAGE_ROLES"),
 		'processor': process
 	}
 

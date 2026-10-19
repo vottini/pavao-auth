@@ -41,6 +41,8 @@ class AuthSupplier(pavao.ParameterSupplier):
 			"PAVAO::ADMIN_ROLE", "Administrator",
 			None)
 
+		await self.authorizer.setup(pg_connection)
+
 
 
 	async def validate_access(self, request, endpoint_specs, authorizer):

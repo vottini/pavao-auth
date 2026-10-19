@@ -13,7 +13,7 @@ blueprints = pavao.path_to("../blueprints.jbp")
 
 
 @pavao.generates_json(file_blueprint=blueprints, with_root="UserRoles")
-async def process(request, pg_connection, path_variables):
+async def process(request, response, pg_connection, path_variables):
 	user_id = path_variables['user']
 
 	user_info = await pg_connection.fetchrow(

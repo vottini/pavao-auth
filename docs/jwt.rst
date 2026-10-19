@@ -50,10 +50,10 @@ Validating tokens
      # malformed, unknown key, or expired key
      ...
 
-``validate_token`` returns the claims dict if the token is structurally valid and its
-signature matches a known key, or ``None`` if it is malformed, signed with an unknown
-key, or was issued with a key that has since expired. The application is responsible for
-checking ``exp`` and other application-level claims after a successful validation.
+``validate_token`` returns the claims dict if the token is structurally valid, its
+signature matches a known key, and its ``exp`` and ``nbf`` claims (if present) are
+satisfied. Returns ``None`` if the token is malformed, signed with an unknown or expired
+key, past its expiration, or not yet valid.
 
 Key rotation
 ============

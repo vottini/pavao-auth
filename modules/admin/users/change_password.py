@@ -44,7 +44,7 @@ def pavao_endpoint():
 		'method': 'POST',
 		'path': '/admin/users/{user:int}/change-password',
 		'package': localizer.map("PACKAGE"),
-		'functionality': localizer.map("EDIT_USERS"),
+		'functionality': localizer.map("MANAGE_USERS"),
 		'processor': process
 	}
 

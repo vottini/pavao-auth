@@ -2,7 +2,7 @@
 import asyncio
 import pavao
 
-(pavao.from_module('../common.py')
+(pavao.from_module('../common')
 	.import_item('assert_admin_access')
 	.import_item('create_message_localizer')
 	.import_item('localizer'))
