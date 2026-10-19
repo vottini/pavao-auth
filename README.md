@@ -23,16 +23,67 @@ JWT-based authentication and role/permission management extension for
 - `403` — valid token but insufficient roles
 - `410` — endpoint disabled at runtime
 
-**Modules**
+**Auth endpoints**
 
-- `modules/auth/endpoints/` — login, logout, token refresh, change password, self-info, credentials
-- `modules/auth/tasks/` — periodic token blacklist cleanup, token purge, secret key rotation
-- `modules/admin/` — full administration API: users, roles, functionalities, task management
+| Method | Path | Source |
+|---|---|---|
+| `POST` | `/login` | [login.py](modules/auth/endpoints/login.py) |
+| `DELETE` | `/logout` | [logout.py](modules/auth/endpoints/logout.py) |
+| `GET` | `/refresh-token` | [refresh_token.py](modules/auth/endpoints/refresh_token.py) |
+| `POST` | `/change-password` | [change_password.py](modules/auth/endpoints/change_password.py) |
+| `GET` | `/self` | [self.py](modules/auth/endpoints/self.py) |
+
+**Admin endpoints**
+
+| Method | Path | Source |
+|---|---|---|
+| `GET` | `/admin/check-login` | [check_login.py](modules/admin/check_login.py) |
+| `POST` | `/admin/users` | [users/create.py](modules/admin/users/create.py) |
+| `GET` | `/admin/users` | [users/list.py](modules/admin/users/list.py) |
+| `GET` | `/admin/users/{user}` | [users/retrieve.py](modules/admin/users/retrieve.py) |
+| `PATCH` | `/admin/users/{user}` | [users/update.py](modules/admin/users/update.py) |
+| `POST` | `/admin/users/{user}/change-password` | [users/change_password.py](modules/admin/users/change_password.py) |
+| `PUT` | `/admin/users/{user}/active` | [users/active/enable.py](modules/admin/users/active/enable.py) |
+| `DELETE` | `/admin/users/{user}/active` | [users/active/disable.py](modules/admin/users/active/disable.py) |
+| `PUT` | `/admin/users/admins` | [users/admins/set.py](modules/admin/users/admins/set.py) |
+| `PUT` | `/admin/users/admins/{user}` | [users/admins/include.py](modules/admin/users/admins/include.py) |
+| `DELETE` | `/admin/users/admins/{user}` | [users/admins/revoke.py](modules/admin/users/admins/revoke.py) |
+| `GET` | `/admin/users/{user}/assignments` | [users/assignments/list.py](modules/admin/users/assignments/list.py) |
+| `PUT` | `/admin/users/{user}/assignments` | [users/assignments/set.py](modules/admin/users/assignments/set.py) |
+| `POST` | `/admin/roles` | [roles/create.py](modules/admin/roles/create.py) |
+| `GET` | `/admin/roles` | [roles/list.py](modules/admin/roles/list.py) |
+| `GET` | `/admin/roles/{role}` | [roles/retrieve.py](modules/admin/roles/retrieve.py) |
+| `PATCH` | `/admin/roles/{role}` | [roles/update.py](modules/admin/roles/update.py) |
+| `DELETE` | `/admin/roles/{role}` | [roles/delete.py](modules/admin/roles/delete.py) |
+| `PUT` | `/admin/roles/{role}/assignments` | [roles/assign.py](modules/admin/roles/assign.py) |
+| `GET` | `/admin/roles/{role}/accesses` | [roles/access/list.py](modules/admin/roles/access/list.py) |
+| `PUT` | `/admin/roles/{role}/access/{functionality}` | [roles/access/create.py](modules/admin/roles/access/create.py) |
+| `DELETE` | `/admin/roles/{role}/access/{functionality}` | [roles/access/remove.py](modules/admin/roles/access/remove.py) |
+| `GET` | `/admin/functionalities` | [functionalities/list.py](modules/admin/functionalities/list.py) |
+| `GET` | `/admin/functionalities/allowed` | [functionalities/allowed.py](modules/admin/functionalities/allowed.py) |
+| `PUT` | `/admin/functionalities/{functionality}/enable` | [functionalities/enable.py](modules/admin/functionalities/enable.py) |
+| `PUT` | `/admin/functionalities/{functionality}/disable` | [functionalities/disable.py](modules/admin/functionalities/disable.py) |
+| `GET` | `/admin/tasks` | [tasks/list.py](modules/admin/tasks/list.py) |
+| `GET` | `/admin/tasks/{task}` | [tasks/retrieve.py](modules/admin/tasks/retrieve.py) |
+| `POST` | `/admin/tasks/{task}/run` | [tasks/execute.py](modules/admin/tasks/execute.py) |
+| `POST` | `/admin/tasks/{task}/stop` | [tasks/stop.py](modules/admin/tasks/stop.py) |
+| `PUT` | `/admin/tasks/{task}/enable` | [tasks/enable.py](modules/admin/tasks/enable.py) |
+| `DELETE` | `/admin/tasks/{task}/enable` | [tasks/disable.py](modules/admin/tasks/disable.py) |
+| `GET` | `/admin/tasks/{task}/executions` | [tasks/executions.py](modules/admin/tasks/executions.py) |
+| `GET` | `/admin/tasks/{task}/output` | [tasks/output.py](modules/admin/tasks/output.py) |
+| `GET` | `/admin/tasks/{task}/monitor` *(SSE)* | [tasks/monitor.py](modules/admin/tasks/monitor.py) |
+
+**Scheduled tasks**
+
+- [clear_blacklist.py](modules/auth/tasks/clear_blacklist.py) — daily: removes expired entries from the in-memory token blacklist
+- [purge_tokens.py](modules/auth/tasks/purge_tokens.py) — hourly: deletes expired refresh tokens from the database
+- [refresh_skey.py](modules/auth/tasks/refresh_skey.py) — daily: rotates the JWT signing key (previous key valid for 5 days)
 
 ## Requirements
 
 - [pavao-postgres](https://github.com/vottini/pavao-postgres) — pavao-auth stores all state in PostgreSQL
 - `argon2-cffi` — password hashing (installed automatically from `requirements.txt`)
+- `python-jose[cryptography]` — JWT signing and validation (installed automatically from `requirements.txt`)
 
 ## Installation
 
