@@ -147,14 +147,10 @@ i18n-aware names in admin interfaces.
 
 ## JWT implementation
 
-Tokens are signed with HMAC-SHA256. The signing key rotates on demand via the
-`refresh_skey` scheduled task or by calling `token_methods.refresh_secret_key()`. A
-previous key can be kept valid for an overlap period to allow in-flight tokens to finish:
-
-```python
-async def process(token_methods):
-    token_methods.refresh_secret_key(previous_validity=timedelta(minutes=5))
-```
+Tokens are signed with HMAC-SHA256. The signing key rotates automatically via the
+`refresh_skey` scheduled task. A previous key can be kept valid for an overlap period
+to allow in-flight tokens to expire gracefully before the old key is discarded.
+See [JWT](docs/jwt.rst) for details.
 
 ## Documentation
 

@@ -64,7 +64,7 @@ before receiving a token with their actual roles.
 Injectables
 ===========
 
-The supplier exposes four named parameters to any endpoint or task that declares them:
+The supplier exposes one named parameter to any endpoint or task that declares it:
 
 .. list-table::
    :header-rows: 1
@@ -117,7 +117,10 @@ client should redirect the user to the password change screen before continuing.
    }
 
 The refresh token is returned as an ``HttpOnly``, ``SameSite=Strict`` cookie scoped to
-``/refresh-token``, and is never exposed in the response body.
+``/refresh-token``, and is never exposed in the response body. The ``HttpOnly`` flag
+prevents JavaScript from reading it via ``document.cookie``, protecting it against XSS
+attacks. The path scope ensures the browser only attaches the cookie on requests to
+``/refresh-token``, not on every API call.
 
 **Errors:**
 
@@ -140,8 +143,9 @@ Token refresh
 
 ``POST /refresh-token``
 
-This endpoint is **public** — it does not require an ``Authorization`` header. It reads
-the refresh token from the cookie set during login.
+This endpoint is **public** — it does not require an ``Authorization`` header. The browser
+automatically attaches the refresh token cookie set during login; JavaScript has no access
+to its value.
 
 The endpoint validates the token signature, looks up the refresh record in the database
 (stored as a SHA-256 hash of the JTI), verifies it has not expired, and then issues new
@@ -300,10 +304,10 @@ Three independent mechanisms can invalidate a token before its natural expiry:
   and on role assignment changes.
 
 **Key rotation**
-  When the signing key is rotated, tokens issued with the old key remain valid only until
-  the key's grace period expires. See :doc:`jwt` for rotation details. A server restart
-  (which generates a new key) invalidates all tokens unless a grace period was configured
-  beforehand.
+  When the signing key is rotated by the scheduled task, tokens issued with the old key
+  remain valid until the grace period expires. See :doc:`jwt` for rotation details. A
+  server restart generates a fresh key with no memory of previous keys, so all outstanding
+  tokens are immediately invalidated.
 
 Scheduled tasks
 ===============
