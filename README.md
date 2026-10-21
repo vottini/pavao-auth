@@ -1,6 +1,8 @@
 
 # pavao-auth
 
+![GitHub tag](https://img.shields.io/github/v/tag/vottini/pavao-auth?label=latest&color=blue)
+
 JWT-based authentication and role/permission management extension for
 [pavao](https://github.com/vottini/pavao).
 
