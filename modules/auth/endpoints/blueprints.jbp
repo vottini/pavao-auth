@@ -7,13 +7,13 @@ object Credentials {
 }
 
 object TokenInfo {
-	access_token: String,
-	token_type: String,
-	expires_in: Integer
+	accessToken: String,
+	tokenType: String,
+	expiresIn: Integer
 }
 
 object LoginInfo extends TokenInfo {
-	change_password: Bool
+	changePassword: Bool
 }
 
 object PasswordUpdate {

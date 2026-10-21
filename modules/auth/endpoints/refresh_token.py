@@ -84,7 +84,7 @@ async def process(request, response, pg_connection, token_methods):
 	refresh_claims = credentials.create_claims(account_id, now,
 		credentials.refresh_validity)
 
-	refresh_hash = hashlib.md5(refresh_claims['jti'].encode()).digest().hex()
+	refresh_hash = hashlib.sha256(refresh_claims['jti'].encode()).hexdigest()
 	refresh_expiry = datetime.fromtimestamp(refresh_claims['exp'], tz=timezone.utc)
 
 	async with pg_connection.transaction():
@@ -103,10 +103,10 @@ async def process(request, response, pg_connection, token_methods):
 	)
 
 	return {
-		"access_token": access_token,
-		"token_type": "Bearer",
-		"expires_in": access_claims['exp'] - int(now.timestamp()),
-		"change_password": False,
+		"accessToken": access_token,
+		"tokenType": "Bearer",
+		"expiresIn": access_claims['exp'] - int(now.timestamp()),
+		"changePassword": False,
 	}
 
 #-------------------------------------------------------------------------------

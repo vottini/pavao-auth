@@ -307,7 +307,7 @@ created manually.
        }
      ]
 
-``GET /admin/functionalities/allowed?roles=[1,2]``
+``GET /admin/functionalities/allowed?roles=1,2``
   List functionalities accessible to the given role IDs.
 
   .. code-block:: json

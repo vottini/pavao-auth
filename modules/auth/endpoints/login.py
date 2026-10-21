@@ -84,10 +84,10 @@ async def process(request, response, pg_connection, token_methods, parsed_json):
 		access_token = token_methods.generate_token(access_claims)
 
 		return {
-			"access_token": access_token,
-			"token_type": "Bearer",
-			"expires_in": access_claims['exp'] - int(now.timestamp()),
-			"change_password": True,
+			"accessToken": access_token,
+			"tokenType": "Bearer",
+			"expiresIn": access_claims['exp'] - int(now.timestamp()),
+			"changePassword": True,
 		}
 
 	roles = await pg_connection.fetch(
@@ -100,7 +100,7 @@ async def process(request, response, pg_connection, token_methods, parsed_json):
 	refresh_claims = credentials.create_claims(account_id, now,
 		credentials.refresh_validity)
 
-	refresh_hash = hashlib.md5(refresh_claims['jti'].encode()).digest().hex()
+	refresh_hash = hashlib.sha256(refresh_claims['jti'].encode()).hexdigest()
 	refresh_expiry = datetime.fromtimestamp(refresh_claims['exp'], tz=timezone.utc)
 
 	await pg_connection.execute(insert_refresh,
@@ -122,10 +122,10 @@ async def process(request, response, pg_connection, token_methods, parsed_json):
 	)
 
 	return {
-		"access_token": access_token,
-		"token_type": "Bearer",
-		"expires_in": access_claims['exp'] - int(now.timestamp()),
-		"change_password": False,
+		"accessToken": access_token,
+		"tokenType": "Bearer",
+		"expiresIn": access_claims['exp'] - int(now.timestamp()),
+		"changePassword": False,
 	}
 
 #-------------------------------------------------------------------------------

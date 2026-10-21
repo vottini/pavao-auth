@@ -102,7 +102,7 @@ The endpoint verifies the password with Argon2, checks that the account is activ
 issues an access token and a refresh token.
 
 If ``change_password`` is set on the account, the access token is issued with an empty
-roles claim. The response body includes ``"change_password": true`` to signal that the
+roles claim. The response body includes ``"changePassword": true`` to signal that the
 client should redirect the user to the password change screen before continuing.
 
 **Response 200:**
@@ -110,10 +110,10 @@ client should redirect the user to the password change screen before continuing.
 .. code-block:: json
 
    {
-     "access_token": "<access_jwt>",
-     "token_type": "Bearer",
-     "expires_in": 600,
-     "change_password": false
+     "accessToken": "<access_jwt>",
+     "tokenType": "Bearer",
+     "expiresIn": 600,
+     "changePassword": false
    }
 
 The refresh token is returned as an ``HttpOnly``, ``SameSite=Strict`` cookie scoped to
@@ -130,7 +130,7 @@ Newly created accounts have the ``change_password`` flag set. The initial access
 carries empty roles, so the user can only reach endpoints that do not require a
 functionality check. The expected flow is:
 
-1. Client calls ``POST /login`` → receives token with ``"change_password": true``
+1. Client calls ``POST /login`` → receives token with ``"changePassword": true``
 2. Client calls ``POST /change-password`` with old and new passwords
 3. ``authorizer.mark_modified()`` is called, invalidating the initial token
 4. Client calls ``POST /login`` again → receives token with actual roles
@@ -144,7 +144,7 @@ This endpoint is **public** — it does not require an ``Authorization`` header.
 the refresh token from the cookie set during login.
 
 The endpoint validates the token signature, looks up the refresh record in the database
-(stored as an MD5 hash of the JTI), verifies it has not expired, and then issues new
+(stored as a SHA-256 hash of the JTI), verifies it has not expired, and then issues new
 access and refresh tokens in a single atomic operation: the old refresh record is deleted
 and the new one is inserted. Replaying a used refresh token therefore fails.
 
@@ -153,9 +153,9 @@ and the new one is inserted. Replaying a used refresh token therefore fails.
 .. code-block:: json
 
    {
-     "access_token": "<new_access_jwt>",
-     "token_type": "Bearer",
-     "expires_in": 600
+     "accessToken": "<new_access_jwt>",
+     "tokenType": "Bearer",
+     "expiresIn": 600
    }
 
 **Errors:** 400 — missing cookie, invalid token, expired token, or disabled account.
