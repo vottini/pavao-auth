@@ -195,7 +195,7 @@ Self
 ``GET /self``
 
 Returns the authenticated user's profile and the full list of functionalities they have
-access to, translated to the locale indicated by the ``Accept-Language`` header.
+access to.
 
 **Response 200:**
 
@@ -213,6 +213,10 @@ access to, translated to the locale indicated by the ``Accept-Language`` header.
        }
      ]
    }
+
+The ``package`` and ``functionality`` values are the raw identifier strings from the
+endpoint descriptor — not localized display names. They are stable across locales and
+suitable for use as permission keys in the frontend.
 
 Protecting endpoints
 ====================
