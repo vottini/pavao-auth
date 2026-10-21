@@ -91,6 +91,10 @@ $ pavao-pkg add github.com/vottini/pavao-auth@<tag>
 
 ## Configuration
 
+The filter is **disabled by default** — loading the extension into the foundation
+directory does not activate it. Set `pavao.auth.enabled: true` in your configuration
+to turn it on.
+
 ```yaml
 pavao:
   auth:
