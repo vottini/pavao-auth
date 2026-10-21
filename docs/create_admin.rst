@@ -1,41 +1,65 @@
 
-create-admin tool
+auth_manager tool
 *****************
 
-The ``create-admin`` tool bootstraps the first administrator account, or adds
-additional ones at any time. It connects directly to the database, so the
-server does not need to be running — though it must have been started at least
-once with pavao-auth loaded and enabled so that the required schema is in place.
+``auth_manager`` is the management tool for pavao-auth. It handles database
+setup and administrator account management, connecting directly to the database
+without requiring the server to be running.
 
 The tool is installed under ``tools/auth/`` by ``pavao-pkg`` and is invoked
 with Python directly:
 
-.. code-block:: bash
+.. code-block:: console
 
-   python tools/auth/create_admin.py [--config-file FILE] (--create-admin | --import-admin FILE)
-
-Options
-=======
+   $ python tools/auth/auth_manager.py [--config-file FILE] <command>
 
 ``--config-file FILE``
    Path to the application configuration file. Defaults to ``application.yml``
    in the current directory.
 
-``--create-admin``
-   Interactive mode. Prompts for first name, last name, login, password, and
-   whether to force a password change on first login. The login field is
-   pre-filled with a suggestion derived from the name.
+Setup
+=====
 
-``--import-admin FILE``
-   Non-interactive mode. Reads the account specification from a YAML file.
-   Useful for automated provisioning and CI environments.
+Run ``setup`` once before starting the server for the first time. It creates
+the ``pavao`` schema and all required tables, seeds the built-in
+``PAVAO::ADMIN_ROLE`` role, and writes the current schema version to
+``pavao.schema_version``.
+
+.. code-block:: console
+
+   $ python tools/auth/auth_manager.py setup
+   Setup complete.
+
+On startup, the supplier reads ``pavao.schema_version`` and compares it against
+the version it expects. If the table is missing or the version does not match,
+the auth filter stays active but returns **503** on every protected endpoint
+until the mismatch is resolved. The server logs a message indicating whether
+``setup`` or ``migrate`` needs to be run.
+
+add-admin
+=========
+
+Creates an administrator account. Can be run at any time after ``setup``.
+
+.. code-block:: console
+
+   $ python tools/auth/auth_manager.py add-admin (--interactive | --import-file FILE)
+
+``--interactive``
+   Prompts for first name, last name, login, password, and whether to force a
+   password change on first login. The login field is pre-filled with a
+   suggestion derived from the name.
+
+``--import-file FILE``
+   Reads the account specification from a YAML file. Useful for automated
+   provisioning and CI environments.
 
 Interactive usage
-=================
+-----------------
 
-.. code-block:: bash
+.. code-block:: console
 
-   python tools/auth/create_admin.py --create-admin
+   $ python tools/auth/auth_manager.py add-admin --interactive
 
    Creating new admin...
    First name: Clara
@@ -46,17 +70,15 @@ Interactive usage
    Change password on next login [Y/n]? n
    Success!
 
-The login field is pre-filled with ``first.last`` in lowercase. It can be
-edited before confirming. Passwords are entered without echo.
+Passwords are entered without echo. If the login already exists the tool
+aborts without modifying anything.
 
 File import
-===========
+-----------
 
-For scripted or repeatable setups, pass a YAML file with ``--import-admin``:
+.. code-block:: console
 
-.. code-block:: bash
-
-   python tools/auth/create_admin.py --import-admin admin.yml
+   $ python tools/auth/auth_manager.py add-admin --import-file admin.yml
 
 The file must contain an ``admin`` section:
 
@@ -71,4 +93,3 @@ The file must contain an ``admin`` section:
 
 ``last_name`` and ``change_password`` are optional (default: empty and
 ``false``). Names are stored in title case regardless of the casing supplied.
-If the login already exists the tool aborts without modifying anything.

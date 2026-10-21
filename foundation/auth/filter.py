@@ -12,8 +12,8 @@ class AuthFilter(pavao.RequestFilter):
 
 	async def enabled(self, endpoint_specs, authorizer, pg_connection):
 		if not common.enabled: return False
-		if endpoint_specs.get('public') is True:
-			return False
+		if endpoint_specs.get('public') is True: return False
+		if not common.schema_ok: return True
 
 		await authorizer.register_functionality(
 			endpoint_specs,
@@ -23,6 +23,10 @@ class AuthFilter(pavao.RequestFilter):
 
 
 	async def allow(self, access_validation, response):
+		if not common.schema_ok:
+			response.set_status(503)
+			return False
+
 		has_access, validation_outcome = access_validation
 		if has_access: return True
 

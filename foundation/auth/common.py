@@ -4,6 +4,7 @@ auth_schema = {
 }
 
 enabled = False
+schema_ok = False
 
 def process_config(loaded_settings):
 	global enabled

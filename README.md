@@ -114,6 +114,26 @@ pavao:
 | `pavao.token.validity.access_minutes` | — | Access token lifetime |
 | `pavao.token.validity.refresh_minutes` | — | Refresh token lifetime |
 
+## First-run setup
+
+Before starting the server, initialize the database schema:
+
+```console
+$ python tools/auth/auth_manager.py setup
+```
+
+Then create the first administrator account:
+
+```console
+$ python tools/auth/auth_manager.py add-admin --interactive
+```
+
+On startup, the supplier checks `pavao.schema_version`. If the table is missing
+or the version does not match, the filter returns **503** on all protected
+endpoints until `auth_manager setup` or `auth_manager migrate` is run.
+
+See [auth_manager tool](docs/create_admin.rst) for the full reference.
+
 ## Marking endpoints
 
 By default every endpoint is protected. Use the `public` descriptor key to opt out:
@@ -157,7 +177,7 @@ See [JWT](docs/jwt.rst) for details.
 - [Authentication & Authorization](docs/authentication.rst) — setup, auth flows, protecting endpoints, token invalidation, scheduled tasks
 - [Administration API](docs/admin.rst) — users, roles, functionalities, task management endpoints
 - [JWT](docs/jwt.rst) — token generation, validation, and key rotation
-- [create-admin tool](docs/create_admin.rst) — bootstrapping the first administrator account
+- [auth_manager tool](docs/create_admin.rst) — database setup and administrator account management
 
 ## License
 

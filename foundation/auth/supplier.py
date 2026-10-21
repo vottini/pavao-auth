@@ -1,5 +1,4 @@
 
-import os
 import asyncio
 import pavao
 
@@ -7,9 +6,8 @@ pavao.import_module('authorizer')
 pavao.import_module('common')
 pavao.import_module('jwt')
 
-queries_dir = pavao.path_to("database")
-db_creation = [arq for arq in os.listdir(queries_dir) if arq.endswith('.sql')]
-db_creation.sort()
+CURRENT_VERSION = 1
+check_schema_version = pavao.include("queries/check_schema_version.sql")
 
 #-------------------------------------------------------------------------------
 
@@ -33,14 +31,17 @@ class AuthSupplier(pavao.ParameterSupplier):
 		if not common.enabled:
 			return
 
-		for query in db_creation:
-			with open(os.path.join(queries_dir, query)) as fd:
-				await pg_connection.execute(fd.read())
+		try:
+			version = await pg_connection.fetchval(check_schema_version)
+		except Exception:
+			print("pavao-auth: schema version table not found — run 'auth_manager setup' first")
+			return
 
-		await self.authorizer.assert_role_existence(pg_connection,
-			"PAVAO::ADMIN_ROLE", "Administrator",
-			None)
+		if version != CURRENT_VERSION:
+			print(f"pavao-auth: schema version mismatch (expected {CURRENT_VERSION}, found {version}) — run 'auth_manager migrate'")
+			return
 
+		common.schema_ok = True
 		await self.authorizer.setup(pg_connection)
 
 

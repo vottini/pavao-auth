@@ -36,30 +36,21 @@ Add the following block to ``application.yml``:
          user: myuser
          password: ${DB_PASSWORD}
 
-On first startup, the supplier runs the SQL scripts in ``foundation/auth/database/``
-to create the ``pavao`` schema and its tables. It also seeds the built-in
-``PAVAO::ADMIN_ROLE`` role. If the tables already exist the scripts are idempotent.
-
-To create the initial administrator account run the setup tool (or insert a row directly):
+Before starting the server, run ``auth_manager setup`` to create the ``pavao``
+schema, tables, seed the built-in ``PAVAO::ADMIN_ROLE`` role, and record the
+current schema version:
 
 .. code-block:: console
 
-   $ python tools/setup.py clara.yml
+   $ python tools/auth/auth_manager.py setup
+   Setup complete.
 
-``clara.yml`` (or any YAML you pass) describes the first admin user:
-
-.. code-block:: yaml
-
-   admin:
-     first_name: Clara
-     last_name: Venturini
-     login: clara.venturini
-     password: hunter12
-     change_password: true
-
-The password is hashed with Argon2 before storage; the plaintext is never persisted.
-Setting ``change_password: true`` forces the user to change their password on first login
-before receiving a token with their actual roles.
+On startup, the supplier checks ``pavao.schema_version`` against its expected
+version. If the table is absent or the version does not match, the filter
+returns **503** on all protected endpoints until the issue is resolved.
+Administrator accounts are managed separately with ``auth_manager add-admin``.
+Passwords are hashed with Argon2 before storage; the plaintext is never persisted.
+See :doc:`create_admin` for the full ``auth_manager`` reference.
 
 Injectables
 ===========
