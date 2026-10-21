@@ -9,7 +9,7 @@ import pavao
 
 enable_user = pavao.include("../../queries/enable_user.sql")
 
-async def process(request, response, pg_connection, path_variables, auth_data):
+async def process(request, response, pg_connection, path_variables, auth_data, authorizer):
 	message_localizer = create_message_localizer(request)
 	target_user = path_variables['user']
 
@@ -27,6 +27,7 @@ async def process(request, response, pg_connection, path_variables, auth_data):
 			"USER_NOT_FOUND")
 
 	else:
+		authorizer.mark_modified(target_user)
 		response.set_status(204)
 
 

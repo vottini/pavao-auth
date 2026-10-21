@@ -12,7 +12,27 @@ during registration, and seeds the in-memory permission cache at startup. No man
 database setup is needed.
 
 Error messages are localized via the ``Accept-Language`` header. Supported locales:
-``en_US``, ``pt_BR``, ``it_IT``.
+
+- ``ar`` — Arabic
+- ``de`` — German
+- ``en`` — English
+- ``es`` — Spanish
+- ``fa`` — Persian
+- ``fr`` — French
+- ``hi`` — Hindi
+- ``id`` — Indonesian
+- ``it`` — Italian
+- ``ja`` — Japanese
+- ``ko`` — Korean
+- ``nl`` — Dutch
+- ``pl`` — Polish
+- ``pt_BR`` — Portuguese (Brazil)
+- ``ru`` — Russian
+- ``th`` — Thai
+- ``tr`` — Turkish
+- ``uk`` — Ukrainian
+- ``vi`` — Vietnamese
+- ``zh_CN`` — Chinese (Simplified)
 
 Users
 =====
@@ -96,7 +116,8 @@ Users
        "change_password": false
      }
 
-  ``change_password`` is optional and updates the reset flag when provided.
+  ``change_password`` is optional; when set to ``true`` the user will be required
+  to change their password on next login before receiving a token with their roles.
   **404** if user not found.
 
 User activation
@@ -106,7 +127,9 @@ User activation
   Activate a disabled user. **204** on success, **404** if not found.
 
 ``DELETE /admin/users/{user:int}/active``
-  Deactivate a user (prevents login). Returns **403** if the caller attempts to
+  Deactivate a user (prevents login). Any tokens the user currently holds are
+  immediately invalidated via ``mark_modified()``, so they cannot continue making
+  requests until the token expires. Returns **403** if the caller attempts to
   deactivate their own account. **204** on success, **404** if not found.
 
 Admin privileges
